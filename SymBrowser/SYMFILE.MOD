@@ -1,5 +1,7 @@
  (* Changes
      @KDS 2005-05-25 : 'File' no longer used
+     ---------------------------------------
+     @KDS 2005-05-27 : added 'pseudo' mode: generate pseudo-module
      
  *)
 MODULE SymFile;
@@ -23,6 +25,8 @@ VAR
   sy*           : INTEGER; 
   debug*        : BOOLEAN; (* Indicates debug-mode *)
   allMod*       : BOOLEAN; (* output of foreign type defs *)
+  (*KDS 2005-05-27:*)
+  pseudo*       : BOOLEAN; (* generate pseudo module *)
 
 PROCEDURE OpenSymFile*(symFileName: ARRAY OF CHAR);
 BEGIN

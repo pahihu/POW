@@ -14,6 +14,7 @@ DEFINITION SBWin32;
     UINT = INT32;
     HINSTANCE = INT32;
     LPSTR = INT32;
+    LPBYTE = INT32(*POINTER TO ARRAY OF CHAR*);
     
   
 (*********************************************************************
@@ -40,6 +41,7 @@ DEFINITION SBWin32;
   CONST 
     XTYP_EXECUTE = 16464;   (*4050H(0x0050 | XCLASS_FLAGS         )*)
     APPCMD_CLIENTONLY = 10H;
+    APPCLASS_STANDARD = 0H;
     DMLERR_NO_ERROR = 0;
   
   
@@ -104,6 +106,12 @@ DEFINITION SBWin32;
                                             )
                                             : HDDEDATA;
   
+  PROCEDURE [_APICALL] DdeAccessData ( hdata: HDDEDATA; VAR dataSize: INT32 ): LPBYTE;
+  
+  PROCEDURE [_APICALL] DdeUnaccessData ( hdata: HDDEDATA );
+  
+  PROCEDURE [_APICALL] DdeFreeDataHandle ( hdata: HDDEDATA );
+  
   PROCEDURE [_APICALL] DdeInitializeA ( VAR idInst: INT32;
                                         pfnCallback: PFNCALLBACK;
                                         afCmd: INT32;
@@ -144,6 +152,8 @@ DEFINITION SBWin32;
                                    : INT32;
       
   PROCEDURE [_APICALL] lstrcpynA (lpStr1, lpStr2 : LPSTR ; iMaxLength : INT32 ): LPSTR;
+  
+  PROCEDURE [_APICALL] lstrlenA (lpStr : LPSTR ): INT32;
   
   PROCEDURE [_APICALL] CreateFileA ( lpFileName: INT32;
                                      dwDesiredAccess: INT32;

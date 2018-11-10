@@ -1,4 +1,9 @@
-(* kds 2005-05-25: do not display export marker for constants *)
+(* kds 2005-05-25: do not display export marker for constants
+
+     @KDS 2005-05-27 : 'pseudo' mode: display export mark for const IF SymFile.pseudo)
+
+*)
+
 MODULE Constant;
 
 (*****************************************************************************
@@ -297,7 +302,10 @@ END ReadSymInformation;
 
 PROCEDURE (self: PConstant) DisplaySymInformation*();
 BEGIN
-  Display.WriteStr('  ');Display.WriteStr(self.constName); Display.WriteStr(' ='); (*@kds was: ' *='*)
+  Display.WriteStr('  ');Display.WriteStr(self.constName);
+  (*@KDS export marker( * ) only if pseudo module mode *)
+  IF SymFile.pseudo THEN Display.WriteStr("*") END;
+  Display.WriteStr(' ='); (*@kds was: ' *='*)
   self.constValue.DisplayConstValue;
   Display.WriteLn;
 END DisplaySymInformation;

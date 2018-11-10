@@ -1,3 +1,5 @@
+(* TODO: check multiple instances of Pow!*)
+
 (* Project Changes
      @KDS 2005-05-25 : - New module "SBWin32", subset of WinApi
                          => removed win32.lib from project;
@@ -17,6 +19,11 @@
                            drag & drop and paste a sym file on the browser.exe
                            a browser window will show up if Pow! is running
                            Bugfix: lstrcpynA iso lstrcpyA: buffer overflow on 'cmd'; 'cmd' buffer size from 100 to 260
+     ---released to Pow32 group---
+     @KDS 2005-05-27 : - option '-p' added = SymFile.pseudo, generate pseudo module
+     @KDS 2005-06-14 : - 'PowDDE' uses a 1000 iso 512 bytes buffer ( = the size of the server buffer)
+     @KDS 2005-06-23 : - 'MiscSym': bugfix: check for cdecl variables
+     ---released to Pow32 group---
  *)
  
 MODULE SymBrowser;
@@ -153,6 +160,9 @@ END ParseParams;
               SymFile.debug := TRUE
             ELSIF param[i] = 'a' THEN
               SymFile.allMod := TRUE
+            (*@kds 2005-05-27*)
+            ELSIF param[i] = 'p' THEN
+              SymFile.pseudo := TRUE
             ELSE invalidParam := TRUE
             END;
             IF param[i] # 0X THEN INC(i) END

@@ -14,6 +14,7 @@ The included patches are:
 - RTS.zip
 - obrn32.zip
 - pow.zip
+- SymBrowser32.zip
 
     To see the the actual contents of the package, please visit the
 ChangeLog section at the end of this file.
@@ -25,11 +26,6 @@ since the linker included with POW understands this format only.
 
     To install the redistributable DLLs please run the PostInstall.bat
 file, after you extract the package contents in a directory.
-
-NOTE:
-    If you are running Windows 2000 SP4 please use the boosted32_w2k.ell
-and obrn32_w2k.dll files. Rename them to boosted32.ell and obrn32.dll
-respectively.
 
 Regards,
 Andras Pahi
@@ -50,3 +46,5 @@ ChangeLog
         - BoostEd.ini file added to the config files
 050624	- BoosteEd as of 2005/06/15
 		- SymBrowser32 included as of 2005/05/26, old Symbrowser removed
+050627	- SymBrowser32 updated to 2005/06/24, project file renamed to
+          SymbolFileBrowser

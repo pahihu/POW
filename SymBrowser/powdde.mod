@@ -1,5 +1,6 @@
 (* @KDS 2005-05-25 : Bugfix: 'Callback' did not return a value
                      could not increase transfer buffer size: strange results in Browser window...
+   @KDS 2005-06-24 : Pow! uses a 1000 bytes buffer >> increase to 1000 (was 512)
 *)
 
 MODULE PowDDE;
@@ -22,7 +23,7 @@ IMPORT
   DDEML := SBWin32, (*@KDS 2005-05-25 *)
   SYSTEM, Float;
   
-CONST bufsize = 512;
+CONST bufsize = 1000; (*@kds Pow! uses a 1000 bytes buffer >> increase to 1000 (was 512)*)
 
 VAR
   instance        : LONGINT;
@@ -32,7 +33,7 @@ VAR
   topicStrHandle  : DDEML.HSZ;
   convContext     : DDEML.HCONV;
   str             : ARRAY 200 OF CHAR;
-  buffer          : ARRAY bufsize OF CHAR; (* buffer to speed up the text-transfer *) (*@ was 512 *)
+  buffer          : ARRAY bufsize OF CHAR; (* buffer to speed up the text-transfer *) (*@KDS was 512 *)
   bufferLen       : LONGINT;
 
 PROCEDURE FlushBuffer();
@@ -180,4 +181,5 @@ END DestroyPowConnection;
 BEGIN
   buffer    := 'AppendText ';
   bufferLen := Strings.Length(buffer);
+  
 END PowDDE.
