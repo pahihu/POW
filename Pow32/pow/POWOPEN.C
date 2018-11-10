@@ -1,19 +1,16 @@
-/******************************************************************************
- *                                                                            *
- * MODULE:             PowOpen.c                                              *
- *                                                                            *
- * PURPOSE:            Contains the file open dialog function and it's helper *
- *                     functions.                                             *
- *                                                                            *
- * FUNCTIONS:                                                                 *
- *   GetFileName       Gets a file name from the user.                        *
- *   ChooseDirectory   Select a directory                                     *
- *                                                                            *
- * AUTHORS:                                                                   *
- *             FIM     Institut für Informationsverarbeitung und Mikroprozessortechnik, University Linz
- *   2000DEC03 StW     Steve Walker                                           *
- *                                                                            *
- ******************************************************************************/
+/**************************************************************************
+ *                                                                        *
+ *  MODULE  : PowOpen.c                                                   *
+ *                                                                        *
+ *  PURPOSE : Contains the file open dialog function and it's helper      *
+ *            functions.                                                  *
+ *                                                                        *
+ *  FUNCTIONS:                                                            *
+ *                                                                        *
+ *        GetFileName       - Gets a file name from the user.             *
+ *        ChooseDirectory   - Select a directory                          *
+ *                                                                        *
+ **************************************************************************/
 
 
 #include <dos.h>
@@ -120,9 +117,9 @@ void FAR GetFileName (LPSTR lpstr,LPSTR capt,BOOL as,LPEXT ext,int exts,HWND par
     ofn.lpstrInitialDir=0;
     ofn.Flags=OFN_PATHMUSTEXIST|OFN_HIDEREADONLY;
 
-        // Steve Walker 3-Dec-2000
-        // Populate ofn struct with capt argument (dialog title)
-        ofn.lpstrTitle = capt;
+	// Steve Walker 3-Dec-2000
+	// Populate ofn struct with capt argument (dialog title)
+	ofn.lpstrTitle = capt;
 
     if (exts>0)
         ofn.lpstrDefExt=&(ext[0].ext[2]);

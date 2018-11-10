@@ -1,27 +1,22 @@
-/******************************************************************************
- *                                                                            *
- * MODULE:             PowRibb.c                                              *
- *                                                                            *
- * PURPOSE:            Contains the code for drawing the ribbon bar           *
- *                                                                            *
- * FUNCTIONS:                                                                 *
- *    InitRibbon       Initializes the ribbon area and buttons                *
- *                                                                            *
- *    DestroyRibbon    Removes the ribbon buttons                             *
- *                                                                            *
- *    ShowRibbon       Display ribbon with buttons                            *
- *                                                                            *
- *    RibbonCommand    Execute a button command                               *
- *                                                                            *
- *    ProjectToRibbon  Copies project filenames to prj-combobox               *
- *                                                                            *
- *    CheckFileAct     Is filename in project-definition?                     *
- *                                                                            *
- * AUTHORS:                                                                   *
- *             FIM     Institut für Informationsverarbeitung und Mikroprozessortechnik, University Linz
- *   2000DEC03 StW     Steve Walker                                           *
- *                                                                            *
- ******************************************************************************/
+/***************************************************************************
+ *                                                                         *
+ *  MODULE    : PowRibb.c                                                  *
+ *                                                                         *
+ *  PURPOSE   : Contains the code for drawing the ribbon bar               *
+ *                                                                         *
+ *  FUNCTIONS : InitRibbon    - Initializes the ribbon area and buttons    *
+ *                                                                         *
+ *              DestroyRibbon - Removes the ribbon buttons                 *
+ *                                                                         *
+ *              ShowRibbon    - Display ribbon with buttons                *
+ *                                                                         *
+ *              RibbonCommand - Execute a button command                   *
+ *                                                                         *
+ *              ProjectToRibbon - Copies project filenames to prj-combobox *
+ *                                                                         *
+ *              CheckFileAct  - Is filename in project-definition?         *
+ *                                                                         *
+ ***************************************************************************/
 
 #include <windows.h>
 #include <string.h>
@@ -129,20 +124,20 @@ void FAR ShowRibbon (HDC hDC)
 //        HFONT oldF;
         HBRUSH oldB;
 
-                // Steve Walker 3-Dec-2000
-                // Remove toolbar (c) notice. Copyright is clear
-                // from about box. Also encryption here is a bit
-                // redundant now that the source is freely
-                // available.
+		// Steve Walker 3-Dec-2000
+		// Remove toolbar (c) notice. Copyright is clear
+		// from about box. Also encryption here is a bit
+		// redundant now that the source is freely
+		// available.
         
-                /* copyright variables */
+		/* copyright variables */
 //        int i;
 //        int len;
 //        char c;
 //        char Copy[40];                         
 //        /* xor 223:    "(c)'97 FIM, Universität Linz." */
 //        char Code[30]= "ñ¥±¶“ÿ«[«¶¬­º©¶±Šÿó’–™ÿèæøö¼÷";
-//              /* end of copyright variables */
+//		/* end of copyright variables */
 
         GetClientRect(hwndFrame,(LPRECT)&r);
 
@@ -170,8 +165,8 @@ void FAR ShowRibbon (HDC hDC)
         SelectObject(hDC,GetStockObject(BLACK_PEN));
         MoveToEx(hDC,r.left,r.bottom,NULL); LineTo(hDC,r.right,r.bottom);
 
-                // Steve Walker 3-Dec-2000  
-                /* copyright message */
+		// Steve Walker 3-Dec-2000  
+		/* copyright message */
 //        i=0;
 //        len=strlen(Code);
 //        while (c=Code[i]) {

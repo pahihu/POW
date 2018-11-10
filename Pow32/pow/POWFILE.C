@@ -1,30 +1,25 @@
-/******************************************************************************
- *                                                                            *
- * MODULE:             PowFile.c                                              *
- *                                                                            *
- * PURPOSE:            Contains the code for File I/O for Multipad.           *
- *                                                                            *
- * FUNCTIONS:                                                                 *
- *   AlreadyOpen       Determines if a file is already open.                  *
- *                                                                            *
- *   AddFile           Creates a new MDI window and, if specified,            *
- *                     loads a file into it.                                  *
- *                                                                            *
- *   LoadFile          Loads a file into a MDI window.                        *
- *                                                                            *
- *   ReadFromFile      Calls File/Open dialog and appropriately               *
- *                     responds to the user's input.                          *
- *                                                                            *
- *   SaveFile          Saves the contents of a MDI window's edit              *
- *                     control to a file.                                     *
- *                                                                            *
- *   ChangeFile        Calls File/SaveAs dialog.                              *
- *                                                                            *
- * AUTHORS:                                                                   *
- *             FIM     Institut für Informationsverarbeitung und Mikroprozessortechnik, University Linz
- *   2000DEC03 StW     Steve Walker                                           *
- *                                                                            *
- ******************************************************************************/
+/***************************************************************************
+ *                                                                         *
+ *  MODULE    : PowFile.c                                                  *
+ *                                                                         *
+ *  PURPOSE   : Contains the code for File I/O for Multipad.               *
+ *                                                                         *
+ *  FUNCTIONS : AlreadyOpen   - Determines if a file is already open.      *
+ *                                                                         *
+ *              AddFile       - Creates a new MDI window and, if specified,*
+ *              loads a file into it.                      *
+ *                                                                         *
+ *              LoadFile      - Loads a file into a MDI window.            *
+ *                                                                         *
+ *              ReadFromFile  - Calls File/Open dialog and appropriately   *
+ *                              responds to the user's input.              *
+ *                                                                         *
+ *              SaveFile      - Saves the contents of a MDI window's edit  *
+ *                              control to a file.                         *
+ *                                                                         *
+ *              ChangeFile    - Calls File/SaveAs dialog.                  *
+ *                                                                         *
+ ***************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -114,20 +109,20 @@ HWND FAR AddFileAt (LPSTR pName,int x,int y,int dx,int dy)
 
     char sz[160];
 
-        MDICREATESTRUCT mcs;
+	MDICREATESTRUCT mcs;
 
-        // Steve Walker 3-Dec-2000.
-        // Added counter for untitled windows
-        static int count = 0;
-        char count_buff[5];
+	// Steve Walker 3-Dec-2000.
+	// Added counter for untitled windows
+	static int count = 0;
+	char count_buff[5];
                                  
     if ((!pName) || (!*pName)) {
     /* The pName parameter is NULL -- load the "Untitled" string from */
     /* STRINGTABLE and set the title field of the MDI CreateStruct.    */
         LoadString (hInst, IDS_UNTITLED, sz, sizeof(sz));
 
-                itoa(++count, count_buff, 10);
-                strcat(sz, count_buff);
+		itoa(++count, count_buff, 10);
+		strcat(sz, count_buff);
         mcs.szTitle = (LPSTR)sz;
         hasTitle=FALSE;
     }
@@ -239,10 +234,10 @@ VOID FAR ReadFromFile (HWND hwnd)
 int FAR SaveFile(HWND hwnd)
 {
     char file[MAXPATHLENGTH],
-                 drive[5],
-                 dir[MAXPATHLENGTH],
-                 fil[MAXPATHLENGTH],
-                 ext[MAXPATHLENGTH];
+		 drive[5],
+		 dir[MAXPATHLENGTH],
+		 fil[MAXPATHLENGTH],
+		 ext[MAXPATHLENGTH];
 
     GetWindowText(hwnd,file,sizeof(file));
     _splitpath(file,drive,dir,fil,ext);
@@ -266,13 +261,13 @@ BOOL FAR ChangeFile (HWND hwnd)
 {
     char new[80],drv[10],path[80],fil[40],ext[80],old[80];
 
-        // Steve Walker 3-Dec-2000
-        // Include window name in dialog box
-        // so we know what we're saving as!
-        char name[80], prompt[88];
+	// Steve Walker 3-Dec-2000
+	// Include window name in dialog box
+	// so we know what we're saving as!
+	char name[80], prompt[88];
     
-        GetWindowText(GetActiveEditWindow(hwndMDIClient),(LPSTR)name, 79);
-        sprintf(prompt, "Save %s As", name);
+	GetWindowText(GetActiveEditWindow(hwndMDIClient),(LPSTR)name, 79);
+	sprintf(prompt, "Save %s As", name);
     strcpy(old,SrcExt[0].ext);
     GetFileName((LPSTR)old,prompt,TRUE,SrcExt,srcN,hwnd);
     if (strlen(old)>0) {

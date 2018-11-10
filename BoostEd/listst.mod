@@ -1,5 +1,5 @@
-(******************************************************************************
- *  Module ListSt
+(*****************************************************************************)
+(*  Module ListSt
  *  
  *  This module implements the class TextT. This class implements the data
  *  structure which is used to store the text in RAM while it is being edited.
@@ -10,70 +10,76 @@
 MODULE ListSt;
 
 
-IMPORT SYSTEM,
-       WD:=WinDef, WU:=WinUser, 
-       Strings, Utils, WinUtils, Options;
+IMPORT 
+  SYSTEM,
+  WinDef, WinUser, 
+  Strings, Utils, WinUtils, Options;
 
 
 CONST 
   
-  MAXLENGTH*=2048;             (* maximum line length *)
+  MAXLENGTH*           =               2048;               (* maximum line length *)
     
-    PEM_SHOWLINER*      = WU.WM_USER+1000;
-    (* Update der Zeilen/Spalteninformationen *)
-    (* wParam: column, lParam: row            *)
-    
-    PEM_SHOWINSERTMODE* = WU.WM_USER+1001;
-    (* Update der Einfügemodusinformationen   *)
-    (* wParam: 1(insert), 0(overwrite)        *)
+  PEM_SHOWLINER*       =               WinUser.WM_USER+1000;
+  (* Update der Zeilen/Spalteninformationen *)
+  (* wParam: column, lParam: row            *)
   
-    PEM_SHOWCHANGED*    = WU.WM_USER+1002;
-    (* Update der Änderungsinformationen      *)
-    (* wParam: 1(geändert), 0(nicht geändert) *)
- 
-   PEM_DOUBLECLICK*    = WU.WM_USER+1003;
-    (* Doppelklick mit der linken Maustaste ist aufgetreten *)
+  PEM_SHOWINSERTMODE*  =               WinUser.WM_USER+1001;
+  (* Update der Einfügemodusinformationen   *)
+  (* wParam: 1(insert), 0(overwrite)        *)
 
-   STEP* = 10;       (* Sprungrate für horizontales Scrolling *) 
-   hs* = TRUE;       (* ermöglichen/sperren von horizontalem Scrolling *) 
-   
-   Font1* = "Fixedsys";
-   Font2* = "Courier"; 
-   Font3* = "Courier New";
-   Font1len* =8;       
-   Font2len* =7;       
+  PEM_SHOWCHANGED*     =               WinUser.WM_USER+1002;
+  (* Update der Änderungsinformationen      *)
+  (* wParam: 1(geändert), 0(nicht geändert) *)
+
+ PEM_DOUBLECLICK*      =               WinUser.WM_USER+1003;
+  (* Doppelklick mit der linken Maustaste ist aufgetreten *)
+
+ STEP*                 =                 10;               (* Sprungrate für horizontales Scrolling *) 
+ hs*                   =               TRUE;               (* ermöglichen/sperren von horizontalem Scrolling *) 
+ 
+ Font1*                =              "Fixedsys";
+ Font2*                =              "Courier"; 
+ Font3*                =              "Courier New";
+ Font1len*             =                  8;       
+ Font2len*             =                  7;       
   
 
 TYPE 
-  String=POINTER TO ARRAY OF CHAR;
+  String               =               POINTER TO ARRAY OF CHAR;
   
-  Line=POINTER TO LineT;       (* Struktur einer Textzeile *)
-  LineT=RECORD
-    txt             : String;  (* Text einer Zeile *)
-    len             : LONGINT; (* Länge einer Zeile *)
-    next            : Line;    (* nächste Zeile *)
-    prev            : Line;    (* vorhergehende Zeile *)
-    isCommented     : BOOLEAN; (* ist ein Kommentar in der Zeile vorhanden ? *)
-    commentNesting  : INTEGER; 
-  END;
+  Line         = POINTER TO LineT;
+  LineT        = RECORD                                    (* Struktur einer Textzeile *)
+    txt:                               String;             (* Text einer Zeile *)
+    len:                               LONGINT;            (* Länge einer Zeile *)
+    next:                              Line;               (* nächste Zeile *)
+    prev:                              Line;               (* vorhergehende Zeile *)
+    isCommented:                       BOOLEAN;            (* ist ein Kommentar in der Zeile vorhanden ? *)
+    commentNesting:                    INTEGER; 
+  END (* LineT *);
 
-  MarkT=RECORD                 (* Markierung *)
-          row*, col*:LONGINT;  (* Zeile und Spalte *)
-        END; 
+  MarkT        = RECORD                                    (* Markierung *)
+    row*,                                                  (* Zeile und Spalte *)
+    col*:                              LONGINT;
+  END (* MarkT *); 
         
-  TextT*=RECORD                        
-          head,tail,current    : Line;    (* Beginn, Ende, Aktuell *)
-          lines-               : LONGINT; (* Gesamtzahl Zeilen *)
-          markStart*,markEnd*  : MarkT;   (* für Markierung, Start und Stop der Markierung *)
-          isSelected-          : BOOLEAN; (* ist eine Markierung vorhanden ? *)
-          copyMark             : LONGINT;
-          commentsChecked      : LONGINT; (* Nummer der Zeile, bis zu der Kommentare gecheckt sind *)
-        END;
-  Text*=POINTER TO TextT;   (* Zeiger auf TextT *)
+  Text*        =                       POINTER TO TextT;   (* Zeiger auf TextT *)
+  TextT*       = RECORD                        
+    head,
+    tail,
+    current:                           Line;               (* Beginn, Ende, Aktuell *)
+    lines-:                            LONGINT;            (* Gesamtzahl Zeilen *)
+    markStart*,
+    markEnd*:                          MarkT;              (* für Markierung, Start und Ende der Markierung *)
+    isSelected-:                       BOOLEAN;            (* ist eine Markierung vorhanden ? *)
+    copyMark:                          LONGINT;
+    commentsChecked:                   LONGINT;            (* Nummer der Zeile, bis zu der Kommentare gecheckt sind *)
+  END (* TextT *);
       
 
 (* FUNKTIONEN FÜR TEXTDATENSTRUKTUR *)
 
+(*****************************************************************************)
 PROCEDURE (VAR line:LineT) Init*;
 (* Initialisierung *)
 BEGIN
@@ -85,8 +91,7 @@ BEGIN
   line.commentNesting:=0;
 END Init;
 
-(*************************************************************************************************)
-
+(*****************************************************************************)
 PROCEDURE (VAR line:LineT) UpdateCommentInfo;
 (* Kommentare werden aktualisiert *)
 VAR
@@ -151,21 +156,19 @@ BEGIN
 END UpdateCommentInfo;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) InvalidateMarkArea*;
 (* Markierung aufheben *)
 VAR
-  done : WD.BOOL;
+  done : WinDef.BOOL;
 
 BEGIN
   IF text.isSelected THEN 
     text.isSelected:=FALSE;
-    done := WU.ShowCaret(WD.NULL); (* Caret anzeigen *)
+    done := WinUser.ShowCaret(WinDef.NULL); (* Caret anzeigen *)
   END;
 END InvalidateMarkArea;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) ResetMarkArea*;
 (* Markierung zurücksetzen *)
 BEGIN
@@ -177,15 +180,14 @@ BEGIN
 END ResetMarkArea;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) SetMarkArea*(row1,col1,row2,col2:LONGINT);
 (* Markierung setzen : Start (row1,col1), Stop(row2, col2) *)
 VAR
-  done : WD.BOOL;
+  done : WinDef.BOOL;
 BEGIN
   IF ~text.isSelected THEN 
     text.isSelected:=TRUE;
-    done := WU.HideCaret(WD.NULL); (* Caret verbergen *)
+    done := WinUser.HideCaret(WinDef.NULL); (* Caret verbergen *)
   END;
   text.markStart.row:=row1;
   text.markStart.col:=col1;
@@ -194,7 +196,6 @@ BEGIN
 END SetMarkArea;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) CheckMarkRange*(VAR swap:BOOLEAN);
 (* Markierungsbereich überprüfen und Markierungsvariablen setzen, Anfang vor Ende *)
 (* liefert TRUE, wenn Positionen vertauscht wurden                                *)
@@ -221,7 +222,6 @@ BEGIN
 END CheckMarkRange;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) Init*;
 (* Initialisierung der Textdatenstruktur *)
 BEGIN
@@ -234,7 +234,6 @@ BEGIN
 END Init;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) SetCurrent(row:LONGINT):BOOLEAN;
 (* aktuelle Zeile auf row setzen     *)
 (* Rückgabewert : TRUE (erfolgreich) *)
@@ -254,7 +253,6 @@ BEGIN
 END SetCurrent;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) CheckForComments(row:LONGINT);
 (* sicherstellen, daß Kommentare richtig gesetzt sind bis zur Zeile row *)
 VAR
@@ -275,7 +273,6 @@ BEGIN
 END CheckForComments;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) SetCurrentEx(row:LONGINT; VAR nesting:INTEGER):BOOLEAN;
 (* liefert die Summe der geöffneten und geschlossen Kommentare in vorherigen Zeilen in nesting *)
 
@@ -308,8 +305,7 @@ BEGIN
   RETURN cur#NIL;
 END SetCurrentEx;
 
-(*************************************************************************************************)
-
+(*****************************************************************************)
 PROCEDURE (VAR text:TextT) AddLine*(VAR txt:ARRAY OF CHAR):BOOLEAN;
 (* fügt eine Zeile zum Text hinzu, die aktuelle Zeile wird auf die neue gesetzt *)
 (* Rückgabewert : TRUE (erfolgreich)                                            *)
@@ -339,7 +335,6 @@ BEGIN
 END AddLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) BulkAddLine*(VAR txt-:ARRAY OF CHAR; len:LONGINT):BOOLEAN;
 (* fügt eine Zeile mit einer gegebenen Länge an den Text an, aktuelle Zeile wird nicht verändert *)
 (* Rückgabewert : TRUE (erfolgreich)                                                             *)
@@ -368,7 +363,6 @@ BEGIN
 END BulkAddLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) InsertLine*(VAR txt:ARRAY OF CHAR; row:LONGINT):BOOLEAN;
 (* fügt eine Zeile vor einer Zeile ein                                 *)
 (* ist row größer als die Gesamtzahl der Zeilen, so wird die Zeile wie *)
@@ -405,7 +399,6 @@ BEGIN
 END InsertLine;
   
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) InsertNextLine*(VAR txt:ARRAY OF CHAR):BOOLEAN;
 (* fügt eine Zeile nach einer Zeile in den Text ein, existiert keine aktuelle Zeile  *)
 (* so wird die Zeile wie bei AddLine eingefügt, die aktuelle Zeile wird auf die neue *)
@@ -438,7 +431,6 @@ BEGIN
 END InsertNextLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) DeleteCurrentLine*():BOOLEAN;
 (* löscht die aktuelle Zeile aus dem Text *)
 
@@ -474,7 +466,6 @@ BEGIN
 END DeleteCurrentLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) DeleteLine*(row:LONGINT):BOOLEAN;
 (* löscht eine Zeile mit der Zeilennummer row aus dem Text, aktuelle Zeile wird auf *)
 (* die nächste Zeile gesetzt                                                        *)
@@ -489,7 +480,6 @@ BEGIN
 END DeleteLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetLine*(row:LONGINT;
                                    VAR txt:ARRAY OF CHAR;
                                    VAR len:LONGINT):BOOLEAN;
@@ -510,7 +500,6 @@ BEGIN
 END GetLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetLineEx*(row:LONGINT;
                                    VAR txt:ARRAY OF CHAR;
                                    VAR len:LONGINT;
@@ -522,21 +511,20 @@ PROCEDURE (VAR text:TextT) GetLineEx*(row:LONGINT;
 VAR 
   done : BOOLEAN;
 BEGIN
-  txt[0]:=0X;
-  len:=0;
-  isCommented:=FALSE;
-  done:=text.SetCurrentEx(row,prevNesting);
+  txt[0]       :=  0X;
+  len          :=  0;
+  isCommented  := FALSE;
+  done         := text.SetCurrentEx(row, prevNesting);
   IF ~done THEN RETURN FALSE END;
   IF LEN(txt)<text.current.len+1 THEN RETURN FALSE END;
-  COPY(text.current.txt^,txt);
-  len:=text.current.len;
-  isCommented:=text.current.isCommented;
-  commentNesting:=text.current.commentNesting; 
+  COPY(text.current.txt^, txt);
+  len          := text.current.len;
+  isCommented  := text.current.isCommented;
+  commentNesting:= text.current.commentNesting; 
   RETURN TRUE;
 END GetLineEx;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetLineLength*
                                       (row:                LONGINT;
                                        VAR len:            LONGINT)
@@ -554,7 +542,6 @@ BEGIN
 END GetLineLength;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetNextLine*(VAR txt:ARRAY OF CHAR; 
                                         VAR len:LONGINT):BOOLEAN;
 (* liefert die Zeile nach der aktuellen Zeile zurück und die aktuelle Zeile wird auf diese *)
@@ -570,7 +557,6 @@ BEGIN
 END GetNextLine;  
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetNextLineEx*(VAR txt:ARRAY OF CHAR; 
                                           VAR len:LONGINT;
                                           VAR isCommented:BOOLEAN;
@@ -588,7 +574,6 @@ BEGIN
 END GetNextLineEx;  
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetPrevLine*(VAR txt:ARRAY OF CHAR;
                                         VAR len:LONGINT):BOOLEAN;
 (* liefert die vorhergehende Zeile zurück und die aktuelle Zeile wird auf diese gesetzt *)
@@ -603,7 +588,6 @@ BEGIN
 END GetPrevLine; 
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetCurrentLine*(VAR txt:ARRAY OF CHAR;
                                            VAR len:LONGINT):BOOLEAN;
 (* liefert die aktuelle Zeile zurück *)
@@ -617,7 +601,6 @@ BEGIN
 END GetCurrentLine; 
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) SetLine*(row:LONGINT;
                                     VAR txt:ARRAY OF CHAR):BOOLEAN;
 (* der Inhalt einer Zeile wird durch txt ersetzt *)
@@ -644,7 +627,6 @@ BEGIN
 END SetLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) SetLineEx*(row:LONGINT;
                                     VAR txt:ARRAY OF CHAR;
                                     VAR nestingChanged:BOOLEAN):BOOLEAN;
@@ -677,7 +659,6 @@ BEGIN
 END SetLineEx;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) MergeLines*(row:LONGINT):BOOLEAN;
 (* der Inhalt einer Zeile row und der folgenden Zeile wird miteinander vereint, die *)
 (* aktuelle Zeile wird gesetzt                                                      *)
@@ -706,7 +687,6 @@ BEGIN
 END MergeLines;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) SplitLine*(row:LONGINT;
                                       len1:LONGINT;
                                       indent:LONGINT):BOOLEAN;
@@ -738,7 +718,6 @@ BEGIN
 END SplitLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GoToLastLine*;
 (* zur letzten Zeile springen *)
 
@@ -747,7 +726,6 @@ BEGIN
 END GoToLastLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GoToFirstLine*;
 (* zur ersten Zeile springen *)
 
@@ -756,7 +734,6 @@ BEGIN
 END GoToFirstLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetCurrentLineNo*(VAR row:LONGINT);
 (* liefert aktuelle Zeilennummer zurück *)
 
@@ -774,7 +751,6 @@ BEGIN
 END GetCurrentLineNo;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetFirstMarkedLine*(VAR txt:ARRAY OF CHAR):BOOLEAN;
 (* liefert den Inhalt der 1.Zeile der Markierung *)
 
@@ -800,7 +776,6 @@ BEGIN
 END GetFirstMarkedLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetNextMarkedLine*(VAR txt:ARRAY OF CHAR):BOOLEAN;
 (* liefert den Inhalt der nächsten Zeile einer Markierung *)
 
@@ -824,7 +799,6 @@ BEGIN
 END GetNextMarkedLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) ResetContents*;
 (* Inhalt zurücksetzen *)
 
@@ -843,7 +817,6 @@ BEGIN
 END ResetContents;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) GetMarkedTextSize*():LONGINT;
 (* Speicherplatz berechnen für markierten Text inklusive Zeilenvorschub *)
 
@@ -877,7 +850,6 @@ BEGIN
 END GetMarkedTextSize;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) InsertInLine*(VAR txt:ARRAY OF CHAR;
                                          pos :LONGINT; 
                                          row:LONGINT):BOOLEAN;
@@ -904,7 +876,6 @@ BEGIN
 END InsertInLine;
 
 (*************************************************************************************************)
-
 PROCEDURE (VAR text:TextT) DeleteInLine*(pos:LONGINT;
                                          len:LONGINT; 
                                          row:LONGINT):BOOLEAN;
@@ -932,5 +903,9 @@ BEGIN
   RETURN done;
 END DeleteInLine;
 
+(*****************************************************************************)
+(*****************************************************************************)
+BEGIN
+  ;
 END ListSt.
 

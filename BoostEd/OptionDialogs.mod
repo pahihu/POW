@@ -7,11 +7,10 @@
 
 MODULE OptionDialogs;
 
-IMPORT 
-  SYSTEM,
-  WD:=WinDef, WB:=WinBase, WU:=WinUser, WN:=WinNT, WG:=WinGdi,
-  Utils, Strings,
-  GlobWin, Options, Env:=EnvHnd, ListSt;
+IMPORT SYSTEM,
+       WD:=WinDef, WB:=WinBase, WU:=WinUser, WN:=WinNT, WG:=WinGdi,
+       Utils, Strings,
+       GlobWin, Options, Env:=EnvHnd, ListSt;
 
 
 CONST

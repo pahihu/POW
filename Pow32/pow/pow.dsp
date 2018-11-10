@@ -47,7 +47,7 @@ RSC=rc.exe
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /o "NUL" /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
-# ADD RSC /l 0x809 /d "NDEBUG"
+# ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
@@ -89,10 +89,6 @@ LINK32=link.exe
 # Name "pow - Win32 Debug"
 # Begin Source File
 
-SOURCE=.\Bmp00001.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\CHILDREN.ICO
 # End Source File
 # Begin Source File
@@ -101,51 +97,7 @@ SOURCE=.\COMP.BMP
 # End Source File
 # Begin Source File
 
-SOURCE=.\Fimabout.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Fimlogo.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Fimlogo2.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\GREY.BMP
-# End Source File
-# Begin Source File
-
-SOURCE=.\Logo.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Logosel.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\main256.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Make.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Makesel.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Open.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Opengry.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Opensel.bmp
 # End Source File
 # Begin Source File
 
@@ -241,27 +193,7 @@ SOURCE=.\POWTOOLS.C
 # End Source File
 # Begin Source File
 
-SOURCE=.\Print.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Printsel.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Rungry.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Save.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\SAVEGRY.BMP
-# End Source File
-# Begin Source File
-
-SOURCE=.\Savesel.bmp
 # End Source File
 # Begin Source File
 
@@ -277,135 +209,11 @@ SOURCE=.\STAT.BMP
 # End Source File
 # Begin Source File
 
-SOURCE=.\Tool.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool1.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool10.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool11.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool12.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TOOL13.BMP
 # End Source File
 # Begin Source File
 
-SOURCE=.\Tool14.bmp
-# End Source File
-# Begin Source File
-
 SOURCE=.\TOOL17.BMP
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool2.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool23.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool24.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool25.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool26.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool27.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool3.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool30.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool33.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool34.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool35.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool36.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool37.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool38.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool39.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool4.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool40.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool41.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool42.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool43.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool5.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool6.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool7.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Tool8.bmp
-# End Source File
-# Begin Source File
-
-SOURCE=.\Toolsel6.bmp
 # End Source File
 # End Target
 # End Project

@@ -1,13 +1,21 @@
-(******************************************************************************
- *  Module TextWin                                         V 1.00.03
- *  
- *  This module implements the class WinDescT, which is the basic editor 
- *  window class. The funcionality supported by this class includes
- *    text output to screen
- *    adding and deleting text
- *    handling to support scroll bars
- *    block indent and unindent
- ******************************************************************************)
+(*****************************************************************************)
+(*  Module TextWin                                         V 1.00.26         *)
+(*                                                                           *)
+(*  This module implements the class WinDescT, which is the basic editor     *)
+(*  window class. The funcionality supported by this class includes          *)
+(*    text output to screen                                                  *)
+(*    adding and deleting text                                               *)
+(*    handling to support scroll bars                                        *)
+(*    block indent and unindent                                              *)
+(*****************************************************************************)
+(*                                                                           *)
+(*  update                                                                   *)
+(*   2003OCT24 KlS     Select*Color put in 1 procedure SelectColor(Index)    *)
+(*                     keyword colouring added                               *)
+(*                                                                           *)
+(*  release                                                                  *)
+(*                                                                           *)
+(*****************************************************************************)
 
 MODULE TextWin;
 
@@ -15,7 +23,7 @@ MODULE TextWin;
 IMPORT 
   SYSTEM,
   WinDef, WinUser, WinGDI, WinBase,
-  List:=ListSt, Utils, Strings, WinUtils, Options, Syntax, GlobMem, GlobWin;
+  List:=ListSt, Utils, Strings, Syntax, WinUtils, Options, GlobMem, GlobWin;
 
 
 CONST
@@ -31,12 +39,16 @@ CONST
   ACT_OVERWRITECHAR*   =                7;                 (* undoLen enthält Anzahl der überschriebenen Zeichen *)
   ACT_OVERWRITESELECTION*=             11;
   ACT_SPLITLINE*       =               12;                 (* undoLen enthält Anzahl der eingefügten Ident Leerzeichen *)
+  MarkColor*           =                1;                 (* KlS, 2003OCT24 *)
+  CommentColor*        =                2;
+  TextColor*           =                3;
+  KeywordColor*        =                4;                 (* KlS, 2003OCT24 *)
 
 
 TYPE
-  WinDesc*  =                          POINTER TO WinDescT;
+  WinDesc*     =                       POINTER TO WinDescT;
 
-  WinDescT* = RECORD
+  WinDescT*    = RECORD
     text*:                             List.Text;          (* Text                                       *)
     hwnd*:                             WinDef.HWND;        (* Fensterhandle                              *)
     changed*:                          BOOLEAN;            (* Änderungen am Text ?                       *)
@@ -70,6 +82,8 @@ TYPE
     mouseX*, mouseY*:                  LONGINT;            (* Mausposition während Markierung            *)
     readOnly*:                         BOOLEAN;            (* Fenster kann nur gelesen werden            *)
   END (* WinDescT *);
+
+  LargeStringT =                       POINTER TO ARRAY 0FFFFFFFH OF CHAR;             (* KlS, 2003OCT24 *)
 
 
 VAR
@@ -241,36 +255,110 @@ END ScreenConfig;
 
 
 (*****************************************************************************)
-PROCEDURE (VAR win:WinDescT) SelectMarkColor;
-(* Farbe für Markierung setzen *)
+(* Set color                                                                 *)
+(*  update                                                                   *)
+(*   2003OCT24 KlS     Select*Color put in 1 procedure SelectColor(Index)    *)
+PROCEDURE (VAR win:WinDescT) SelectColor*
+                                      (Index:              LONGINT);
 VAR
-  dummy : WinDef.COLORREF;
+  ColorRef:                            WinDef.COLORREF;
+  
 BEGIN
-  dummy := WinGDI.SetTextColor(win.hdc, colHighlightText); (* Textfarbe setzen *)
-  dummy := WinGDI.SetBkColor(win.hdc, colHighlight);       (* Hintergrundfarbe setzen *)
-END SelectMarkColor;
+  CASE Index OF
+    MarkColor:
+      ColorRef := WinGDI.SetTextColor(win.hdc, colHighlightText); (* Textfarbe setzen *)
+      ColorRef := WinGDI.SetBkColor(win.hdc, colHighlight);       (* Hintergrundfarbe setzen *)
+    |
+    CommentColor:
+      ColorRef := WinGDI.SetTextColor(win.hdc, Options.CommentColor);
+      ColorRef := WinGDI.SetBkColor(win.hdc, colWnd); 
+    |
+    KeywordColor:
+      ColorRef := WinGDI.SetTextColor(win.hdc, Options.KeyWordColor);
+      ColorRef := WinGDI.SetBkColor(win.hdc, colWnd); 
+    ELSE                                                   (* TextColor *)
+      ColorRef := WinGDI.SetTextColor(win.hdc, colWndText);
+      ColorRef := WinGDI.SetBkColor(win.hdc, colWnd); 
+  END (* CASE Index  *);
+END SelectColor;
 
 
 (*****************************************************************************)
-PROCEDURE (VAR win:WinDescT) SelectTextColor*;
-(* Textfarbe wählen *)
-VAR  
-  dummy : WinDef.COLORREF;
-BEGIN
-  dummy := WinGDI.SetTextColor(win.hdc,colWndText);
-  dummy := WinGDI.SetBkColor(win.hdc,colWnd); 
-END SelectTextColor;
+(* TextOut                                                                   *)
+(*  created    2003OCT24 KlS                                                 *)
+PROCEDURE (VAR win:WinDescT) TextOut* (Color:              LONGINT;
+                                       x,
+                                       y:                  LONGINT;
+                                       TextPtr:            WinDef.LPSTR;
+                                       Length:             LONGINT)
+                                      :WinDef.LRESULT;
 
+VAR
+  i,
+  j,
+  Pos1,
+  Pos2:                                LONGINT;
+  Result:                              WinDef.LRESULT;
+  Token:                               ARRAY 64 OF CHAR;
+  MyText:                              LargeStringT;
 
-(*****************************************************************************)
-PROCEDURE (VAR win:WinDescT) SelectCommentColor*;
-(* Farbe für Kommentartext setzen *)
-VAR  
-  dummy : WinDef.COLORREF;
+  (*-------------------------------------------------------------------------*)
+  PROCEDURE AreEqual                  (Token,
+                                       KeyWord:            ARRAY OF CHAR;
+                                       Length:             LONGINT)
+                                      :BOOLEAN;
+  VAR
+    i:                                 LONGINT;
+  BEGIN
+    FOR i:=0 TO Length-1 DO
+      IF Token[i]#KeyWord[i] THEN
+        RETURN FALSE
+      END (* IF Token[i]#KeyWord[i]  *);
+    END (* FOR i:=0 TO Length-1  *);
+    RETURN TRUE
+  END AreEqual;
+
+(*---------------------------------------------------------------------------*)
 BEGIN
-  dummy := WinGDI.SetTextColor(win.hdc,Options.commentColor);
-  dummy := WinGDI.SetBkColor(win.hdc,colWnd); 
-END SelectCommentColor;
+  CASE Color OF
+    TextColor:
+      MyText       := SYSTEM.VAL(LargeStringT, TextPtr);
+      Pos1         :=  0;
+      i            :=  0;
+      WHILE i<Length DO
+        IF Syntax.IsIdentChar(MyText[i]) THEN
+          j  :=  1;
+          WHILE ((Syntax.KeyWords[j, 0]<MyText^[i]) & (j<=Syntax.NoOfKeyWords)) DO
+            INC(j);
+          END (* WHILE ((MyText^[i]<Syntax.KeyWords[j, 0]) & (j<=S *);
+          WHILE ((Syntax.KeyWords[j, 0]=MyText^[i]) & (j<=Syntax.NoOfKeyWords)) DO
+            Pos2     := i;
+            Syntax.GetIdent(MyText^, Token, i);
+            IF (((i-Pos2)=Syntax.KeyWordLength[j])
+            & AreEqual(Token, Syntax.KeyWords[j], Syntax.KeyWordLength[j])
+            & ((Pos2=0) OR ~Syntax.IsIdentChar(MyText[Pos2-1]))) THEN
+              win.SelectColor(TextColor);
+              Result       := WinGDI.TextOutA(win.hdc, x+Pos1*win.charwidth, y, TextPtr+Pos1, Pos2-Pos1);
+              win.SelectColor(KeywordColor);
+              Result       := WinGDI.TextOutA(win.hdc, x+Pos2*win.charwidth, y, TextPtr+Pos2, Syntax.KeyWordLength[j]);
+              Pos1         := i;
+            ELSE
+              i            := Pos2;
+            END (* IF (((i-Pos2)=Syntax.KeyWordLength[j])  *);
+            INC(j);
+          END (* WHILE ((MyText^[i]=Syntax.KeyWords[j, 0]) & (j<=S *);
+        END (* IF Syntax.IsIdent(MyText[i])  *);
+        INC(i);
+      END (* WHILE i<Length  *);
+      win.SelectColor(TextColor);
+      Result       := WinGDI.TextOutA(win.hdc, x+Pos1*win.charwidth, y, TextPtr+Pos1, Length-Pos1);
+    ELSE
+      win.SelectColor(Color);
+      Result       := WinGDI.TextOutA(win.hdc, x, y, TextPtr, Length);
+  END (* CASE Color  *);
+  
+  RETURN Result
+END TextOut;
 
 
 (*****************************************************************************)
@@ -294,8 +382,7 @@ VAR
   i:INTEGER;
 BEGIN
   i:=0;
-  WHILE (Options.stringDelims[i]#0X) &
-        (Options.stringDelims[i]#x) DO
+  WHILE (Options.stringDelims[i]#0X) & (Options.stringDelims[i]#x) DO
     INC(i);
   END;
   RETURN Options.stringDelims[i]=x;
@@ -309,8 +396,7 @@ VAR
   sInx:LONGINT;
 BEGIN
   sInx:=0;
-  WHILE (Options.commentStart[sInx]#0X) &
-        (Options.commentStart[sInx]=txt[sInx+inx]) DO
+  WHILE (Options.commentStart[sInx]#0X) & (Options.commentStart[sInx]=txt[sInx+inx]) DO
     INC(sInx);
   END;
   RETURN Options.commentStart[sInx]=0X;
@@ -318,180 +404,166 @@ END IsCommentStartAt;
 
 
 (*****************************************************************************)
-PROCEDURE (VAR win:WinDescT) WriteTextLine(VAR txt-:ARRAY OF CHAR;
-                                           len:LONGINT;
-                                           isCommented:BOOLEAN;
-                                           nesting:INTEGER;
-                                           row:LONGINT);
-(* Textzeile ausgeben *)
+(* Textzeile ausgeben                                                        *)
+(*  updated    KlS 2003OCT24   procedure TextOut implemented & integrated    *)
+PROCEDURE (VAR win:WinDescT) WriteTextLine
+                                      (VAR txt-:           ARRAY OF CHAR;
+                                       len:                LONGINT;
+                                       isCommented:        BOOLEAN;
+                                       nesting:            INTEGER;
+                                       row:                LONGINT);
+
 VAR
-  dummy              : WinDef.BOOL;
-  len1,len2,len3     : LONGINT;
-  x,y                : LONGINT;
-  l,startInx,i       : LONGINT;
-  colFlag,oldColFlag : INTEGER;
-  strChar            : CHAR;
-  comEndInx          : LONGINT;
-  earliestComEnd     : LONGINT;
+  dummy:                               WinDef.BOOL;
+  len1,
+  len2,
+  len3:                                LONGINT;
+  x,
+  y:                                   LONGINT;
+  l,
+  startInx,
+  i:                                   LONGINT;
+  colFlag,
+  oldColFlag:                          INTEGER;
+  strChar:                             CHAR;
+  comEndInx:                           LONGINT;
+  earliestComEnd:                      LONGINT;
+
 BEGIN
-  x:=win.initcolpos+win.charwidth*(1-win.colPos);
-  y:=win.initrowpos+win.lineheight*(row-win.textPos);
+  x            := win.initcolpos+win.charwidth*(1-win.colPos);
+  y            := win.initrowpos+win.lineheight*(row-win.textPos);
+
   IF txt="" THEN
-    win.BackRect(0,y,win.wndwidth-1,y+win.lineheight-1);
+    win.BackRect(0, y, win.wndwidth-1, y+win.lineheight-1);
     RETURN;
   END;
-  win.BackRect(x+win.charwidth*len,y,win.wndwidth-1,y+win.lineheight-1);
+
+  win.BackRect(x+win.charwidth*len, y, win.wndwidth-1, y+win.lineheight-1);
+
   IF Options.colorComments & isCommented THEN
-    colFlag:=-1;
-    startInx:=0;
-    i:=0;
-    strChar:=0X;
-    comEndInx:=0;
-    earliestComEnd:=0;
+    colFlag    := -1;
+    startInx   :=  0;
+    i          :=  0;
+    strChar    :=  0X;
+    comEndInx  :=  0;
+    earliestComEnd :=  0;
+    
     WHILE txt[i]#0X DO
       IF strChar#0X THEN
         IF txt[i]=strChar THEN
-          strChar:=0X;
+          strChar  := 0X;
         END;
-        comEndInx:=0;
+        comEndInx  :=  0;
       ELSIF (nesting<=0) & IsStrChar(txt[i]) THEN
-        strChar:=txt[i];
-        comEndInx:=0;
-      ELSIF (txt[i]=Options.commentStart[0]) &
-            IsCommentStartAt(txt,i) THEN
+        strChar    := txt[i];
+        comEndInx  :=  0;
+      ELSIF (txt[i]=Options.commentStart[0]) & IsCommentStartAt(txt,i) THEN
         IF Options.commentsNested OR (nesting<=0) THEN
           INC(nesting);
         END;
-        comEndInx:=0;
-        earliestComEnd:=i+Strings.Length(Options.commentStart);
+        comEndInx      := 0;
+        earliestComEnd := i+Strings.Length(Options.commentStart);
       ELSIF Options.commentEnd[comEndInx]=0X THEN
         IF Options.commentsNested OR (nesting>0) THEN
           DEC(nesting);
         END;
-        comEndInx:=0;
-      ELSIF (txt[i]=Options.commentEnd[comEndInx]) & 
-            (i>=earliestComEnd) THEN
+        comEndInx      := 0;
+      ELSIF (txt[i]=Options.commentEnd[comEndInx]) & (i>=earliestComEnd) THEN
         INC(comEndInx);
-      ELSIF (txt[i]=Options.commentEnd[0]) & 
-            (i>=earliestComEnd) THEN
-        comEndInx:=1;
+      ELSIF (txt[i]=Options.commentEnd[0]) & (i>=earliestComEnd) THEN
+        comEndInx  :=  1;
       ELSE
-        comEndInx:=0;
-      END;
-      oldColFlag:=colFlag;
+        comEndInx  :=  0;
+      END (* IF strChar#0X *);
+      oldColFlag := colFlag;
       IF win.text.isSelected & (
-         ((row>win.text.markStart.row) & (row<win.text.markEnd.row)) OR
-         ((row=win.text.markStart.row) & (row<win.text.markEnd.row) & (i+1>=win.text.markStart.col)) OR
-         ((row>win.text.markStart.row) & (row=win.text.markEnd.row) & (i+1<win.text.markEnd.col)) OR
-         ((row=win.text.markStart.row) & (row=win.text.markEnd.row) & 
-                                        (i+1>=win.text.markStart.col) & (i+1<win.text.markEnd.col))
-          ) THEN
-        colFlag:=1;
+        ((row>win.text.markStart.row) & (row<win.text.markEnd.row)) OR
+        ((row=win.text.markStart.row) & (row<win.text.markEnd.row) & (i+1>=win.text.markStart.col)) OR
+        ((row>win.text.markStart.row) & (row=win.text.markEnd.row) & (i+1<win.text.markEnd.col)) OR
+        ((row=win.text.markStart.row) & (row=win.text.markEnd.row) & (i+1>=win.text.markStart.col) & (i+1<win.text.markEnd.col))) THEN
+        colFlag  :=  1;
       ELSE    
-        IF nesting>0 THEN colFlag:=2 ELSE colFlag:=3 END;
-      END;
+        IF nesting>0 THEN 
+          colFlag  :=  2 
+        ELSE 
+          colFlag  :=  3 
+        END (* IF nesting>0 *);
+      END (* IF win.text.isSelected & (... *);
       IF ((oldColFlag#colFlag) & (oldColFlag#-1)) OR (txt[i+1]=0X) THEN
-        CASE oldColFlag OF
-          1:win.SelectMarkColor;
-        | 2:win.SelectCommentColor;
-        | 3:win.SelectTextColor;
-        ELSE
-          GlobWin.Beep;
-        END;
-        (* Text ausgeben *)
-        dummy:=WinGDI.TextOutA(win.hdc,x,y,SYSTEM.ADR(txt[startInx]),i-startInx);
-        x:=x+win.charwidth*(i-startInx);
-        startInx:=i;
+        dummy    := win.TextOut(oldColFlag, x, y, SYSTEM.ADR(txt[startInx]), i-startInx);
+        x        := x + win.charwidth*(i-startInx);
+        startInx := i;
       END;
       INC(i);
     END;
-    CASE colFlag OF
-      1:win.SelectMarkColor;
-    | 2:win.SelectCommentColor;
-    | 3:win.SelectTextColor;
-    ELSE
-      GlobWin.Beep;
-    END;
-    (* Text ausgeben *)
-    dummy := WinGDI.TextOutA(win.hdc,x,y,SYSTEM.ADR(txt[i-1]),1);
-  ELSIF win.text.isSelected & 
-        (row>=win.text.markStart.row) & (row<=win.text.markEnd.row) THEN
+    dummy := win.TextOut(colFlag, x, y, SYSTEM.ADR(txt[i-1]), 1);
+
+  ELSIF win.text.isSelected                                (* IF Options.colorComments & isCommented *)
+    & (row>=win.text.markStart.row)& (row<=win.text.markEnd.row) THEN
     IF win.text.markStart.row=win.text.markEnd.row THEN
       len1:=win.text.markStart.col-1;
       len2:=win.text.markEnd.col-1-len1;
       len3:=len-len1-len2;
       IF len1>0 THEN
-        IF Options.colorComments & (nesting>0) THEN win.SelectCommentColor ELSE win.SelectTextColor END;
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,x,y,SYSTEM.ADR(txt),len1);
+        IF Options.colorComments & (nesting>0) THEN
+          dummy := win.TextOut(CommentColor, x, y, SYSTEM.ADR(txt), len1);
+        ELSE 
+          dummy := win.TextOut(TextColor, x, y, SYSTEM.ADR(txt), len1);
+        END;
       END;
       IF len2>0 THEN
-        win.SelectMarkColor;
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,
-                             x+len1*win.charwidth,
-                             y,
-                             SYSTEM.ADR(txt)+len1,len2);
+        dummy := win.TextOut(MarkColor, x+len1*win.charwidth, y, SYSTEM.ADR(txt)+len1, len2);
       END;
       IF len3>0 THEN
-        IF Options.colorComments & (nesting>0) THEN win.SelectCommentColor ELSE win.SelectTextColor END;
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,
-                             x+(len1+len2)*win.charwidth,
-                             y,
-                             SYSTEM.ADR(txt)+len1+len2,len3);
+        IF Options.colorComments & (nesting>0) THEN 
+          dummy := win.TextOut(CommentColor, x+(len1+len2)*win.charwidth, y, SYSTEM.ADR(txt)+len1+len2, len3);
+        ELSE
+          dummy := win.TextOut(TextColor, x+(len1+len2)*win.charwidth, y, SYSTEM.ADR(txt)+len1+len2, len3);
+        END;
       END;
     ELSIF row=win.text.markStart.row THEN
-      len1:=win.text.markStart.col-1;
+      len1     := win.text.markStart.col-1;
       IF len1>0 THEN
-        IF Options.colorComments & (nesting>0) THEN win.SelectCommentColor ELSE win.SelectTextColor END; 
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,x,y,SYSTEM.ADR(txt),len1);
+        IF Options.colorComments & (nesting>0) THEN
+          dummy := win.TextOut(CommentColor, x, y, SYSTEM.ADR(txt), len1);
+        ELSE 
+          dummy := win.TextOut(TextColor, x, y, SYSTEM.ADR(txt), len1);
+        END;
       END;
-      win.SelectMarkColor;
-      IF len=0 THEN
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,x-win.charwidth DIV 2,y,SYSTEM.ADR("  "),1);
+      IF len=0 THEN 
+        dummy := win.TextOut(MarkColor, x-win.charwidth DIV 2, y, SYSTEM.ADR("  "), 1);
       ELSE
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,
-                             x+len1*win.charwidth,
-                             y,
-                             SYSTEM.ADR(txt)+len1,len-len1);
+        dummy := win.TextOut(MarkColor, x+len1*win.charwidth, y, SYSTEM.ADR(txt)+len1, len-len1);
       END;
     ELSIF row=win.text.markEnd.row THEN
       len1:=win.text.markEnd.col-1;
       IF len=0 THEN
-(*        win.SelectMarkColor;
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,SHORT(x-win.charwidth DIV 2),SHORT(y),SYSTEM.ADR("  "),1);
-        win.SelectTextColor; *)
+        (* dummy := in.TextOut(MarkColor,SHORT(x-win.charwidth DIV 2),SHORT(y),SYSTEM.ADR("  "),1); *);
       ELSIF len1>0 THEN
-        win.SelectMarkColor;
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,x,y,SYSTEM.ADR(txt),len1);
-      END;
-      IF Options.colorComments & (nesting>0) THEN win.SelectCommentColor ELSE win.SelectTextColor END; 
-      (* Text ausgeben *)
-      dummy := WinGDI.TextOutA(win.hdc,
-                           x+len1*win.charwidth,
-                           y,
-                           SYSTEM.ADR(txt)+len1,len-len1);
-    ELSE
-      win.SelectMarkColor;
-      IF len>0 THEN
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,x,y,SYSTEM.ADR(txt),len);
+        win.SelectColor(MarkColor);
+        dummy := win.TextOut(MarkColor, x, y, SYSTEM.ADR(txt), len1);
+      END (* IF len=0 *);
+      IF Options.colorComments & (nesting>0) THEN
+        dummy := win.TextOut(CommentColor, x+len1*win.charwidth, y, SYSTEM.ADR(txt)+len1, len-len1);
       ELSE
-        (* Text ausgeben *)
-        dummy := WinGDI.TextOutA(win.hdc,x-win.charwidth DIV 2,y,SYSTEM.ADR("  "),1);
+        dummy := win.TextOut(TextColor, x+len1*win.charwidth, y, SYSTEM.ADR(txt)+len1, len-len1);
       END;
+    ELSE
+      IF len>0 THEN
+        dummy := win.TextOut(MarkColor, x, y, SYSTEM.ADR(txt), len);
+      ELSE
+        dummy := win.TextOut(MarkColor, x-win.charwidth DIV 2, y, SYSTEM.ADR("  "), 1);
+      END (* IF len>0 *);
     END;
+
   ELSE
-    IF Options.colorComments & (nesting>0) THEN win.SelectCommentColor ELSE win.SelectTextColor END; 
-    (* Text ausgeben *)
-    dummy := WinGDI.TextOutA(win.hdc,x,y,SYSTEM.ADR(txt),len);
-  END;
+    IF Options.colorComments & (nesting>0) THEN
+      dummy      := win.TextOut(CommentColor, x, y, SYSTEM.ADR(txt), len);
+    ELSE
+      dummy      := win.TextOut(TextColor, x, y, SYSTEM.ADR(txt), len);
+    END (* IF Options.colorComments & (nesting>0) *); 
+  END (* IF Options.colorComments & isCommented *);
+  
 END WriteTextLine;
 
 
@@ -506,9 +578,14 @@ VAR
   done        : WinDef.BOOL;
 
 BEGIN
-  IF (row<win.textPos) OR (row>win.textPos+win.lineNo) THEN RETURN END;
+  IF (row<win.textPos) OR (row>win.textPos+win.lineNo) THEN
+    RETURN 
+  END (* IF (row<win.textPos) OR (row>win.textPos+win.lineNo) *);
+
   done := WinUser.HideCaret(win.hwnd); (* Caret vom Bildschirm verbergen *)
-  IF ~win.text.GetLineEx(row,localTxt,len,isCommented,nesting,h) THEN localTxt:="" END;
+  IF ~win.text.GetLineEx(row, localTxt, len, isCommented, nesting, h) THEN 
+    localTxt   := ""
+  END;
   win.WriteTextLine(localTxt,len,isCommented,nesting,row);
   done := WinUser.ShowCaret(win.hwnd); (* Caret anzeigen *)
 END ShowTextLine;    
@@ -730,15 +807,13 @@ END DeleteLine;
 PROCEDURE (VAR win:WinDescT) InsertText*(source:WinDef.LPSTR):BOOLEAN;
 (* Text an aktueller Caretposition einfügen  *)
 (* Rückgabewert : TRUE (erfolgreich), FALSE (Fehler) *)
-TYPE
-  LargeString=POINTER TO ARRAY 0FFFFFFFH OF CHAR;
 VAR 
   dmy                     : WinDef.LPSTR;
   i,j                     : LONGINT;
   linelen                 : LONGINT;
   merge, update,dmyb      : BOOLEAN;
   offset,xoffset,strlen,r : LONGINT;
-  text                    : LargeString;
+  text                    : LargeStringT;
   done                    : WinDef.BOOL;
   rect                    : WinDef.RECT;
   
@@ -764,7 +839,7 @@ VAR
   END NextLineFromSource;
   
 BEGIN
-  text:=SYSTEM.VAL(LargeString,source);
+  text:=SYSTEM.VAL(LargeStringT,source);
   i:=0;
   merge:=FALSE;
   offset:=0; xoffset:=0;

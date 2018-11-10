@@ -43,8 +43,8 @@ BEGIN
       DEC(i);
     END;
     Strings.Append(help,HELPFILENAME);
-                               (* Steve Walker 17-Nov-2000: Help now calls contents dialog *)
-    dmyi:=WU.WinHelpA(hEdit, SYSTEM.ADR(help), WU.HELP_FINDER, 0); (* WU.HELP_CONTENTS,0); *)
+       
+    dmyi:=WU.WinHelpA(hEdit, SYSTEM.ADR(help), WU.HELP_CONTENTS,0);
     IF dmyi=0 THEN 
       tmp:="The helpfile must reside at ";
       Strings.Append(tmp,help);

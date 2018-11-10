@@ -466,7 +466,7 @@ BEGIN
   CodeSTP_P1LongReal;
   IF CTRL_WORD_ROUND#CTRL_WORD_DEFAULT THEN CodeFNClEx; ctrlWord:=CTRL_WORD_DEFAULT; CodeFLDCW_V1 ELSE CodeFWAIT END;
   RETURN x;
-END ArcTanL;
+END ArcTanL;
 
 PROCEDURE ArcSin*(x:REAL):REAL;
 (** The return value is the arc sine of <x> in radians. 

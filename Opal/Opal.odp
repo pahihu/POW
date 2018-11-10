@@ -1,0 +1,31 @@
+00
+
+(D:\POWTEST\OBERON-2\TOOLS\REPORT.EXE Report.BrowserDocT)283076555,305,DATA             -1,
+ "1.1"
+ (D:\WINNT\system\OPALPP01.DLL Container.StrListT)283076555,307,DATA             -1,
+  14 
+  ".\DISPLAY.MOD"
+  ".\FILE.MOD"
+  ".\FLOAT.MOD"
+  ".\IN.MOD"
+  ".\OOBASE.MOD"
+  ".\OUT.MOD"
+  ".\PARAM.MOD"
+  ".\PRINT.MOD"
+  ".\PROCESS.MOD"
+  ".\STRINGS.MOD"
+  ".\UTILS.MOD"
+  ".\VOLUME.MOD"
+  ".\XYPLANE.MOD"
+  ".\COLORP~~1.MOD"
+  -1 
+ END 
+ 1 
+ FALSE 
+ TRUE 
+ FALSE 
+ TRUE 
+ "D:\POWTEST\OBERON-2\SRC\OPAL\OPAL.RTF"
+ ""
+ TRUE 
+END 

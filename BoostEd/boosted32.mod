@@ -37,11 +37,10 @@
 
 MODULE Boosted32;
 
-IMPORT
-  SYSTEM,
-  WinDef, WinBase, WinUser, WinNT, WinGDI,
-  GlobWin, WinHnd, TextWin, FileHnd, ListSt, EditWin, EnvHnd, Print,
-  Options, OptionDialogs;
+IMPORT SYSTEM,
+       WD:=WinDef, WB:=WinBase, WU:=WinUser, WN:=WinNT, WG:=WinGDI,
+       GlobWin, WinHnd, TextWin, FileHnd, ListSt, EditWin, EnvHnd, Print,
+       Options, OptionDialogs;
 
 
 CONST
@@ -53,9 +52,6 @@ CONST
 
 
 
-
-(***********************************************************************************************)   
-
 PROCEDURE [_APICALL] InterfaceVersion* (): INTEGER;
 (* returns the code for the Pow! editor interface version supported by the editor *)
 BEGIN
@@ -63,113 +59,101 @@ BEGIN
 END InterfaceVersion;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] NewEditWindow* (parent:WinDef.HWND; readOnly:INTEGER);
+PROCEDURE [_APICALL] NewEditWindow* (parent:WD.HWND;readOnly:INTEGER);
 (* Creates an empty new editor window. If readOnly is true, keyboard 
    input to the window is disabled. *)
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in NewEditWindow "); END;
-  WinHnd.NewEditWindow(parent, readOnly#0);
+  WinHnd.NewEditWindow(parent,readOnly#0);
 END NewEditWindow;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] CloseEditWindow* (edit:WinDef.HWND);
+PROCEDURE [_APICALL] CloseEditWindow* (edit:WD.HWND);
 (* Closes an edit window. Any changes to the contents are lost. *)
 VAR
-  hEdit : WinDef.HWND;
-  res   : WinDef.BOOL;
+  hEdit : WD.HWND;
+  res   : WD.BOOL;
 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in CloseEditWindow "); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);
-  res:=WinUser.DestroyWindow(hEdit);
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);
+  res:=WU.DestroyWindow(hEdit);
 END CloseEditWindow;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] HasChanged* (edit:WinDef.HWND): INTEGER;
+PROCEDURE [_APICALL] HasChanged* (edit:WD.HWND): INTEGER;
 (* This function returns TRUE if the text in the edit window has been changed
    since it was loaded from file *)
 VAR
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
   win   : EditWin.EditWin;
 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in HasChanged "); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);
   win:=EditWin.AssocWinObj(hEdit);
   IF win.changed THEN RETURN 1 ELSE RETURN 0 END;
 END HasChanged;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] LoadFile* (edit:WinDef.HWND; name:WinDef.LPSTR): INTEGER;
+PROCEDURE [_APICALL] LoadFile* (edit:WD.HWND; name:WD.LPSTR): INTEGER;
 (* The edit window is loaded with the file specified in <name> *)
 VAR 
-  hEdit      : WinDef.HWND;
+  hEdit      : WD.HWND;
   res        : INTEGER;
   hcurSave,
-  tmpcur     : WinDef.HCURSOR;
+  tmpcur     : WD.HCURSOR;
   win        : EditWin.EditWin; 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in LoadFile "); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   win:=EditWin.AssocWinObj(hEdit);
-  hcurSave:=WinUser.SetCursor(WinUser.LoadCursorA(WinDef.NULL,WinUser.IDC_WAIT)); (* Cursorumriﬂ ‰ndern *)
+  hcurSave:=WU.SetCursor(WU.LoadCursorA(WD.NULL,WU.IDC_WAIT)); (* Cursorumriﬂ ‰ndern *)
   win.text.ResetContents;
   res:=FileHnd.LoadFile(hEdit, name);
-  tmpcur:=WinUser.SetCursor(hcurSave);
+  tmpcur:=WU.SetCursor(hcurSave);
   IF TRACE_CALLS THEN GlobWin.DisplayError("","end of LoadFile") END;
   RETURN res;
 END LoadFile;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] SaveFile* (edit:WinDef.HWND; name:WinDef.LPSTR): INTEGER;
+PROCEDURE [_APICALL] SaveFile* (edit:WD.HWND; name:WD.LPSTR): INTEGER;
 (* The current contents of the edit window are stored in the file specified by
    <name>. The previous contents of the file are overwritten. *)
 VAR 
-  hEdit        : WinDef.HWND;
+  hEdit        : WD.HWND;
   res          : INTEGER;
   hcurSave,
-  tmpcur       : WinDef.HCURSOR;
-  reslt        : WinDef.LRESULT;
+  tmpcur       : WD.HCURSOR;
+  reslt        : WD.LRESULT;
   win          : EditWin.EditWin; 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in SaveFile ") END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   win:=EditWin.AssocWinObj(hEdit);
-  hcurSave:=WinUser.SetCursor(WinUser.LoadCursorA(WinDef.NULL,WinUser.IDC_WAIT));
+  hcurSave:=WU.SetCursor(WU.LoadCursorA(WD.NULL,WU.IDC_WAIT));
   res:=FileHnd.SaveFile(hEdit, name);
   IF res=1 THEN  
     win.changed:=FALSE;
-    reslt:=WinUser.SendMessageA(WinUser.GetParent(hEdit),ListSt.PEM_SHOWCHANGED,0,0);
+    reslt:=WU.SendMessageA(WU.GetParent(hEdit),ListSt.PEM_SHOWCHANGED,0,0);
   ELSE
     GlobWin.Beep;
   END; 
-  tmpcur:=WinUser.SetCursor(hcurSave);
+  tmpcur:=WU.SetCursor(hcurSave);
   RETURN res;
 END SaveFile;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] GetCursorpos* (edit:WinDef.HWND; VAR row,col:LONGINT): INTEGER;
+PROCEDURE [_APICALL] GetCursorpos* (edit:WD.HWND; VAR row,col:LONGINT): INTEGER;
 (* This function returns the current position of the cursor in the edit window
    in <row> and <col>. 
    The return value of the function is 1 for success and 0 for failure. *)
 VAR 
-  hEdit     : WinDef.HWND;
+  hEdit     : WD.HWND;
   win       : EditWin.EditWin; 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in GetCursorPos "); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   win:=EditWin.AssocWinObj(hEdit);
   IF win#NIL THEN
     row:=win.row;
@@ -181,71 +165,61 @@ BEGIN
 END GetCursorpos;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Copy* (edit:WinDef.HWND): INTEGER;
+PROCEDURE [_APICALL] Copy* (edit:WD.HWND): INTEGER;
 (* The currently selected text is copied to the clipboard 
    The return value of the function is 1 for success and 0 if there was
    a fault or no text was selected. *)
 VAR
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Copy "); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   RETURN WinHnd.Copy(hEdit);
 END Copy;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Paste* (edit:WinDef.HWND): INTEGER;
+PROCEDURE [_APICALL] Paste* (edit:WD.HWND): INTEGER;
 (* The current contents of the clipboard is inserted at the current 
    cursor location 
    The return value of the function is 1 for success and 0 if there was
    a fault or the clipboard was empty. *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Paste"); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   RETURN WinHnd.Paste(hEdit);
 END Paste;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Cut* (edit:WinDef.HWND): INTEGER;
+PROCEDURE [_APICALL] Cut* (edit:WD.HWND): INTEGER;
 (* The currently selected text is copied into the clipboard and removed 
    from the edit window. 
    The return value of the function is 1 for success and 0 if there was
    a fault or no text was selected. *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Cut "); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   RETURN WinHnd.Cut(hEdit);
 END Cut;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Clear* (edit:WinDef.HWND): INTEGER;
+PROCEDURE [_APICALL] Clear* (edit:WD.HWND): INTEGER;
 (* The currently selected text is deleted
    The return value of the function is 1 for success and 0 if there was
    a fault or no text was selected. *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
   win   : EditWin.EditWin; 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Clear"); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   win:=EditWin.AssocWinObj(hEdit);
   IF win.CutSelectionFromScreen() THEN RETURN 1 ELSE RETURN 0 END;
 END Clear;
 
-
-(***********************************************************************************************)   
 
 PROCEDURE [_APICALL] CanUndo* (): INTEGER;
 (* The return value of the function is
@@ -259,40 +233,34 @@ BEGIN
 END CanUndo;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Undo* (edit:WinDef.HWND);
+PROCEDURE [_APICALL] Undo* (edit:WD.HWND);
 (* The last change to the text is undone *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
   win   : EditWin.EditWin;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Undo "); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   win:=EditWin.AssocWinObj(hEdit);
   win.Undo;
 END Undo;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Redo* (edit:WinDef.HWND);
+PROCEDURE [_APICALL] Redo* (edit:WD.HWND);
 (* The last undone change to the text is done again *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
   win   : EditWin.EditWin;
 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Redo"); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   win:=EditWin.AssocWinObj(hEdit);
   win.Redo;
 END Redo;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] GotoPos* (edit:WinDef.HWND; row,col:LONGINT): INTEGER;
+PROCEDURE [_APICALL] GotoPos* (edit:WD.HWND; row,col:LONGINT): INTEGER;
 (* The cursor position is set to the position defined by <row> and <col>.
    Column and row count starts with 1.
    The cursor can be set after the end of the text by setting <row> or 
@@ -301,7 +269,7 @@ VAR
   win : EditWin.EditWin;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in GotoPos ") END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   IF win#NIL THEN 
     win.CursGoto(row, col);
     RETURN 1;
@@ -311,10 +279,8 @@ BEGIN
 END GotoPos;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Search* (edit:WinDef.HWND;
-                              text:WinDef.LPSTR;
+PROCEDURE [_APICALL] Search* (edit:WD.HWND;
+                              text:WD.LPSTR;
                               matchcase,down,words:BOOLEAN): BOOLEAN;
 (* The string defined in <text> is searched for in the designated edit
    window. The search is 
@@ -327,16 +293,14 @@ VAR
   win   : EditWin.EditWin;
 BEGIN      
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Search"); END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   IF win=NIL THEN RETURN FALSE END;
   RETURN win.SearchText(text, matchcase, down, words);
 END Search;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Replace* (edit:WinDef.HWND;
-                               text,new:WinDef.LPSTR;
+PROCEDURE [_APICALL] Replace* (edit:WD.HWND;
+                               text,new:WD.LPSTR;
                                matchcase,down,words,all,ask:BOOLEAN): INTEGER;
 (* The string defined in <text> is replcaded with the string defined in
    <new> in the designated edit window. The search for the text which should
@@ -358,17 +322,17 @@ VAR
   VAR
     res : LONGINT;
   BEGIN
-    res:=WinUser.MessageBoxA(win.hwnd,
+    res:=WU.MessageBoxA(win.hwnd,
                       SYSTEM.ADR("Replace ?"),
                       SYSTEM.ADR("Search and Replace"),
-                      WinUser.MB_YESNOCANCEL);
-    IF res=WinUser.IDCANCEL THEN all:=FALSE END;
-    RETURN res=WinUser.IDYES;
+                      WU.MB_YESNOCANCEL);
+    IF res=WU.IDCANCEL THEN all:=FALSE END;
+    RETURN res=WU.IDYES;
   END ReplaceOk;
 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Replace"); END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   IF win=NIL THEN RETURN 0 END;
   win.SetUndoAction(TextWin.ACT_NONE);
   once:=FALSE;
@@ -388,9 +352,7 @@ BEGIN
 END Replace;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Keywords* (caseSensitive:BOOLEAN; words:WinDef.LPSTR);
+PROCEDURE [_APICALL] Keywords* (caseSensitive:BOOLEAN; words:WD.LPSTR);
 (* This function supplies the editor with a list of key words to allow
    syntax highlighting. *)
 BEGIN
@@ -398,23 +360,19 @@ BEGIN
 END Keywords;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] SetCommandProcedure* (command:WinDef.FARPROC);
+PROCEDURE [_APICALL] SetCommandProcedure* (command:WD.FARPROC);
 (* This function is not supported. *)
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in SetCommandProcedure "); END;
 END SetCommandProcedure;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] Comments* (nested:WinDef.WORD;
-                                on,off,stringstart:WinDef.LPSTR);
+PROCEDURE [_APICALL] Comments* (nested:WD.WORD;
+                                on,off,stringstart:WD.LPSTR);
 (* This function defines the strings which are used to open and close a comment
    in the source file depending on the compiler which is currently selected. *)
 VAR 
-  dmy: WinDef.LPSTR;
+  dmy: WD.LPSTR;
   buf: ARRAY 1024 OF CHAR;
   
   PROCEDURE CutBufAtBlank;
@@ -428,34 +386,30 @@ VAR
   
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in Comments"); END;
-  dmy:=WinBase.lstrcpyA(SYSTEM.ADR(buf),on);  
+  dmy:=WB.lstrcpyA(SYSTEM.ADR(buf),on);  
   CutBufAtBlank;  (* Boosted can only handle one alternative *)
   COPY(buf,Options.commentStart);
-  dmy:=WinBase.lstrcpyA(SYSTEM.ADR(buf),off);  
+  dmy:=WB.lstrcpyA(SYSTEM.ADR(buf),off);  
   CutBufAtBlank;  (* Boosted can only handle one alternative *)
   COPY(buf,Options.commentEnd);
-  dmy:=WinBase.lstrcpyA(SYSTEM.ADR(buf),stringstart);  
+  dmy:=WB.lstrcpyA(SYSTEM.ADR(buf),stringstart);  
   COPY(buf,Options.stringDelims);
   Options.commentsNested:=nested#0;
 END Comments;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] SetHelpFile* (name:WinDef.LPSTR);
+PROCEDURE [_APICALL] SetHelpFile* (name:WD.LPSTR);
 (* This function defines the help file which should be used for context
    sensitive help. This is usually a help file for a programming language. *)
 VAR 
-  dmy: WinDef.LPSTR;
+  dmy: WD.LPSTR;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in SetHelpFile "); END;
-  dmy:=WinBase.lstrcpyA(SYSTEM.ADR(WinHnd.langHelpFile),name);  
+  dmy:=WB.lstrcpyA(SYSTEM.ADR(WinHnd.langHelpFile),name);  
 END SetHelpFile;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] GetFirstBuffer* (edit:WinDef.HWND; buf:WinDef.LPSTR; size:LONGINT): LONGINT;
+PROCEDURE [_APICALL] GetFirstBuffer* (edit:WD.HWND; buf:WD.LPSTR; size:LONGINT): LONGINT;
 (* This function is used in combination with GetNextBuffer to retrieve the contents of the 
    designated edit window via a small transfer buffer. This function has to be called once
    to start the transfer before GetNextBuffer can be used to retrieve the remainder of the
@@ -466,12 +420,12 @@ PROCEDURE [_APICALL] GetFirstBuffer* (edit:WinDef.HWND; buf:WinDef.LPSTR; size:L
    to the buffer. The end of the text has been reached when the return value is
    smaller than <size>. *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
   ptr   : POINTER TO ARRAY OF CHAR; 
   r     : LONGINT;  
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in GetFirstBuffer"); END;
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);
   NEW(ptr,size);
   ASSERT(ptr#NIL);
   r := FileHnd.GetFirstBuffer(hEdit, ptr^, size);
@@ -481,9 +435,7 @@ BEGIN
 END GetFirstBuffer;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] GetNextBuffer* (edit:WinDef.HWND; buf:WinDef.LPSTR; size:LONGINT): LONGINT;
+PROCEDURE [_APICALL] GetNextBuffer* (edit:WD.HWND; buf:WD.LPSTR; size:LONGINT): LONGINT;
 (* This function is used to retrieve the contents of the designated edit window
    via a small transfer buffer. Each call to this function fills the transfer
    buffer with the next piece of text. The size of the transfer buffer is defined
@@ -492,12 +444,12 @@ PROCEDURE [_APICALL] GetNextBuffer* (edit:WinDef.HWND; buf:WinDef.LPSTR; size:LO
    to the buffer. The end of the text has been reached when the return value is
    smaller than <size>. *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
   ptr   : POINTER TO ARRAY OF CHAR;
   r     : LONGINT;  
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in GetNextBuffer"); END; 
-  hEdit:=WinUser.GetWindow(edit, WinUser.GW_CHILD);  
+  hEdit:=WU.GetWindow(edit, WU.GW_CHILD);  
   NEW(ptr,size);
   ASSERT(ptr#NIL);
   r := FileHnd.GetNextBuffer(hEdit, ptr^, size);
@@ -506,8 +458,6 @@ BEGIN
   RETURN r;  
 END GetNextBuffer;
 
-
-(***********************************************************************************************)   
 
 PROCEDURE [_APICALL] GeneratesAscii* (): INTEGER;
 (* The return value of this function is 1 if the editor generates
@@ -520,9 +470,7 @@ BEGIN
 END GeneratesAscii;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] LoadOpen* (file:WinDef.LPSTR): INTEGER;
+PROCEDURE [_APICALL] LoadOpen* (file:WD.LPSTR): INTEGER;
 (* This function is not supported. *)
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in LoadOpen"); END;
@@ -530,10 +478,8 @@ BEGIN
 END LoadOpen;
 
 
-(***********************************************************************************************)   
-
 PROCEDURE [_APICALL] LoadRead* (handle:INTEGER; 
-                                buf:WinDef.LPSTR; 
+                                buf:WD.LPSTR; 
                                 size:LONGINT): LONGINT;
 (* This function is not supported. *)
 BEGIN
@@ -542,8 +488,6 @@ BEGIN
 END LoadRead;
 
 
-(***********************************************************************************************)   
-
 PROCEDURE [_APICALL] LoadClose* (handle:INTEGER);
 (* This function is not supported. *)
 BEGIN
@@ -551,9 +495,7 @@ BEGIN
 END LoadClose;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] PrintWindow* (edit:WinDef.HWND): INTEGER;
+PROCEDURE [_APICALL] PrintWindow* (edit:WD.HWND): INTEGER;
 (* The contents of the designated edit window is printed.
    This function displays a dialog box to determine print 
    parameters before the text is printed. *)
@@ -563,38 +505,34 @@ VAR
   len    : LONGINT;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in PrintWindow "); END;
-  len:=WinUser.GetWindowTextA(edit,SYSTEM.ADR(title),LEN(title)-1);
+  len:=WU.GetWindowTextA(edit,SYSTEM.ADR(title),LEN(title)-1);
   title[len]:=0X;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   RETURN Print.PrintFile(edit,win,title);
 END PrintWindow;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] InsertText* (edit:WinDef.HWND; text:WinDef.LPSTR): INTEGER;
+PROCEDURE [_APICALL] InsertText* (edit:WD.HWND; text:WD.LPSTR): INTEGER;
 (* The zero terminated string given in <text> is inserted at the
    current cursor position. *)
 VAR 
   win  : EditWin.EditWin;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in InsertText "); END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   win.SetUndoAction(TextWin.ACT_NONE);
   IF win.InsertText(text) THEN RETURN 1 ELSE RETURN 0 END;
 END InsertText;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] AddText* (edit:WinDef.HWND; text:WinDef.LPSTR): INTEGER;
+PROCEDURE [_APICALL] AddText* (edit:WD.HWND; text:WD.LPSTR): INTEGER;
 (* The zero terminated string given in <text> is appended to the current
    contents of the edit window. *)
 VAR 
   win  : TextWin.WinDesc;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in AddText"); END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   IF win#NIL THEN
     win.SetUndoAction(TextWin.ACT_NONE);
     RETURN WinHnd.AddText(win, text);
@@ -604,50 +542,44 @@ BEGIN
 END AddText;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] ResizeWindow* (edit:WinDef.HWND; width,height:INTEGER);
+PROCEDURE [_APICALL] ResizeWindow* (edit:WD.HWND; width,height:INTEGER);
 (* The size of the designated edit window is changed to a width of <width> pixels 
    and a height of <height> pixels. The size defines the total size of the edit 
    window and not the size of the client area. *)
 VAR 
-  hEdit : WinDef.HWND;
+  hEdit : WD.HWND;
   win   : TextWin.WinDesc;
-  res   : WinDef.BOOL;
+  res   : WD.BOOL;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in ResizeWindow "); END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
-  res:=WinUser.MoveWindow(win.hwnd,0,0,width,height,WinDef.True);
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
+  res:=WU.MoveWindow(win.hwnd,0,0,width,height,WD.True);
   win.ScreenConfig;
 END ResizeWindow;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] HasSelection* (edit:WinDef.HWND): INTEGER;
+PROCEDURE [_APICALL] HasSelection* (edit:WD.HWND): INTEGER;
 (* The return value of the function is 1 if text is selected in 
    the edit window and 0 if no text is selected. *)
 VAR 
   win : TextWin.WinDesc; 
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in HasSelection "); END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   IF win.text.isSelected THEN RETURN 1 ELSE RETURN 0 END;
 END HasSelection;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] ResetContent*(edit:WinDef.HWND);
+PROCEDURE [_APICALL] ResetContent*(edit:WD.HWND);
 (* The designated edit window is cleared. *)
 VAR 
   win   : TextWin.WinDesc; 
   dummy : LONGINT;
-  done  : WinDef.BOOL;
-  rect  : WinDef.RECT;
+  done  : WD.BOOL;
+  rect  : WD.RECT;
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in ResetContent "); END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   IF win#NIL THEN
     win.text.ResetContents;
     win.ScreenConfig;
@@ -656,17 +588,15 @@ BEGIN
     win.textPos:=1;
     win.SetCaret;
     win.SetUndoAction(TextWin.ACT_NONE);
-    done := WinUser.InvalidateRect(win.hwnd,rect,0);
-    done := WinUser.UpdateWindow(win.hwnd);
+    done := WU.InvalidateRect(win.hwnd,rect,0);
+    done := WU.UpdateWindow(win.hwnd);
   ELSE
     GlobWin.Beep;
   END;
 END ResetContent;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] GetText* (edit:WinDef.HWND): WinDef.HGLOBAL;
+PROCEDURE [_APICALL] GetText* (edit:WD.HWND): WD.HGLOBAL;
 (* A global memory object handle to the text in the current editor window
    is returned.
    This function is not supported in this editor version and therefore
@@ -677,16 +607,14 @@ BEGIN
 END GetText;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] GetLine* (edit:WinDef.HWND;
+PROCEDURE [_APICALL] GetLine* (edit:WD.HWND;
                                row,max:INTEGER;
-                               buf:WinDef.LPSTR): INTEGER;
+                               buf:WD.LPSTR): INTEGER;
 (* The contents of the line number <row> is copied into the buffer <buf>.
    If the line contains more than <max> characters the line is truncated to
    avoid a buffer overflow. *)
 VAR
-  dmy     : WinDef.LPSTR;
+  dmy     : WD.LPSTR;
   line    : ARRAY ListSt.MAXLENGTH OF CHAR; 
   len     : LONGINT;
   win     : TextWin.WinDesc;
@@ -695,7 +623,7 @@ VAR
 BEGIN
   INC(row);
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in GetLine ") END;
-  win:=EditWin.AssocWinObj(WinUser.GetWindow(edit, WinUser.GW_CHILD));
+  win:=EditWin.AssocWinObj(WU.GetWindow(edit, WU.GW_CHILD));
   IF win.text.GetLine( row, line, len) THEN
     IF len > max THEN
       SYSTEM.MOVE(SYSTEM.ADR(line),buf,max);
@@ -711,9 +639,7 @@ BEGIN
 END GetLine;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] ShowHelp* (hEdit:WinDef.HWND);
+PROCEDURE [_APICALL] ShowHelp* (hEdit:WD.HWND);
 (* The editor help file is shown *)
 BEGIN
   IF TRACE_CALLS THEN GlobWin.DisplayError("","in ShowHelp"); END;
@@ -721,20 +647,18 @@ BEGIN
 END ShowHelp;
 
 
-(***********************************************************************************************)   
-
 PROCEDURE [_APICALL] EditOptions*();
 (* A dialog window is opened which allows the user to change editor option
    settings.
    This editor implementation stores the options selected by the user in the
    file "boosted.ini". *)
 VAR 
-  hdc                : WinDef.HDC;
-  hObj               : WinDef.HGDIOBJ;
+  hdc                : WD.HDC;
+  hObj               : WD.HGDIOBJ;
   res                : LONGINT;
   i                  : INTEGER;
-  oldFocus,dhwnd     : WinDef.HWND;
-  done               : WinDef.BOOL;
+  oldFocus,dhwnd     : WD.HWND;
+  done               : WD.BOOL;
   lfHeight           : LONGINT;
 
 BEGIN
@@ -742,38 +666,36 @@ BEGIN
   OptionDialogs.EditOptions;
   
   FOR i:=0 TO WinHnd.wCounter-1 DO
-    hObj:=WinGDI.SelectObject(WinHnd.wList[i].hdc,WinHnd.wList[i].oldFont);
+    hObj:=WG.SelectObject(WinHnd.wList[i].hdc,WinHnd.wList[i].oldFont);
   END;
   IF WinHnd.wCounter>0 THEN
-    IF WinGDI.DeleteObject(WinHnd.hFont)=0 THEN GlobWin.DisplayError("ERROR","Can not delete current font"); END; 
-    hdc:=WinUser.GetDC(WinDef.NULL);
-    lfHeight:=-WinBase.MulDiv(Options.fontSize,
-                         WinGDI.GetDeviceCaps(hdc,WinGDI.LOGPIXELSY),
+    IF WG.DeleteObject(WinHnd.hFont)=0 THEN GlobWin.DisplayError("ERROR","Can not delete current font"); END; 
+    hdc:=WU.GetDC(WD.NULL);
+    lfHeight:=-WB.MulDiv(Options.fontSize,
+                         WG.GetDeviceCaps(hdc,WG.LOGPIXELSY),
                          72);
-    res:=WinUser.ReleaseDC(WinDef.NULL,hdc);
-    WinHnd.hFont := WinGDI.CreateFontA(lfHeight,
+    res:=WU.ReleaseDC(WD.NULL,hdc);
+    WinHnd.hFont := WG.CreateFontA(lfHeight,
                                    0,0,0,0,0,0,0,0,0,0,
-                                   WinGDI.DEFAULT_QUALITY,
-                                   WinGDI.FIXED_PITCH,
+                                   WG.DEFAULT_QUALITY,
+                                   WG.FIXED_PITCH,
                                    SYSTEM.ADR(Options.fontName));
-    oldFocus:=WinDef.NULL;
+    oldFocus:=WD.NULL;
     FOR i:=0 TO WinHnd.wCounter-1 DO
-      IF oldFocus=WinDef.NULL THEN
-        oldFocus:=WinUser.SetFocus(WinHnd.wList[i].hwnd);
+      IF oldFocus=WD.NULL THEN
+        oldFocus:=WU.SetFocus(WinHnd.wList[i].hwnd);
       ELSE
-        dhwnd:=WinUser.SetFocus(WinHnd.wList[i].hwnd);
+        dhwnd:=WU.SetFocus(WinHnd.wList[i].hwnd);
       END;
-      WinHnd.SetWindowOldFont(i,WinGDI.SelectObject(WinHnd.wList[i].hdc,WinHnd.hFont));
+      WinHnd.SetWindowOldFont(i,WG.SelectObject(WinHnd.wList[i].hdc,WinHnd.hFont));
       WinHnd.wList[i].ScreenConfig;          
-      done := WinUser.InvalidateRect(WinHnd.wList[i].hwnd,NIL,0);
+      done := WU.InvalidateRect(WinHnd.wList[i].hwnd,NIL,0);
       WinHnd.wList[i].CursGoto(WinHnd.wList[i].row,WinHnd.wList[i].col);
     END;
-    dhwnd:=WinUser.SetFocus(oldFocus);
+    dhwnd:=WU.SetFocus(oldFocus);
   END;
 END EditOptions;
 
-
-(***********************************************************************************************)   
 
 PROCEDURE [_APICALL] UnloadEditor*;
 (* This function is obsolete in the Win32 API based version of BoostEd.
@@ -782,30 +704,25 @@ BEGIN
 END UnloadEditor;
 
 
-(***********************************************************************************************)   
-
-PROCEDURE [_APICALL] DllEntryPoint* (hInst:WinDef.HINSTANCE;
-                                     reason:WinDef.DWORD;
-                                     reserved:WinDef.LPVOID): WinDef.BOOL;
+PROCEDURE [_APICALL] DllEntryPoint* (hInst:WD.HINSTANCE;
+                                     reason:WD.DWORD;
+                                     reserved:WD.LPVOID): WD.BOOL;
 (* This function is called by the NT program loader when the editor DLL is 
    loaded or unloaded *)
 BEGIN
-  IF reason=WinNT.DLL_PROCESS_ATTACH THEN
+  IF reason=WN.DLL_PROCESS_ATTACH THEN
     GlobWin.hInstance:=hInst;     (* remember DLL instance handle for later use *)
     IF ~WinHnd.RegisterClass() THEN (* register window class for editor windows *)
       GlobWin.Beep;
-      RETURN WinDef.False;
+      RETURN WD.False;
     END;
     EnvHnd.ReadIniFile();
-  ELSIF reason=WinNT.DLL_PROCESS_DETACH THEN
+  ELSIF reason=WN.DLL_PROCESS_DETACH THEN
     WinHnd.CloseAllWindows;       
     WinHnd.UnregisterClass;       (* unregister window class for editor windows *)
   END;
-  RETURN WinDef.True;
+  RETURN WD.True;
 END DllEntryPoint;
-
-
-(***********************************************************************************************)   
 
 END Boosted32.
   

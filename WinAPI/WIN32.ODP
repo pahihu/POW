@@ -1,0 +1,24 @@
+00
+
+(C:\POW\REPORT.EXE Report.BrowserDocT)245522078,305,DATA             -1,
+ "1.1"
+ (D:\WINNT351\system\OPALPP01.DLL Container.StrListT)245522078,307,DATA             -1,
+  7 
+  ".\COMMDLG.MOD"
+  ".\WINBASE.MOD"
+  ".\WINCON.MOD"
+  ".\WINDEF.MOD"
+  ".\WINGDI.MOD"
+  ".\WINNT.MOD"
+  ".\WINUSER.MOD"
+  -1 
+ END 
+ 1 
+ FALSE 
+ TRUE 
+ FALSE 
+ TRUE 
+ "M:\POW\POW32\WINAPI\WINAPI.RTF"
+ ""
+ TRUE 
+END 

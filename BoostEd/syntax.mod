@@ -2,8 +2,8 @@
 (*                                                                           *)
 (* Project:    BoostEd32                                                     *)
 (*                                                                           *)
-(* Module:     Syntax                                      V 1.00.09         *)
-(*                                                         2002OCT10         *)
+(* Module:     Syntax                                      V 1.00.18         *)
+(*                                                         2003OCT29         *)
 (*  PURPOSE:   This module provides hard coded Oberon-2 specific syntax      *)
 (*             support to automatically complete frequently used constructs  *)
 (*             as they are typed.                                            *)
@@ -23,6 +23,7 @@
 (*   2002JUL16 KlS     comment added after "END" Statement                   *)
 (*   2002SEP13 Luca    Module Name added after last END statement            *)
 (*   2002OCT10 KlS     comments after "END" Statement corrected              *)
+(*   2003OCT24 KlS     keyword colouring added                               *)
 (*                                                                           *)
 (*  release                                                                  *)
 (*                                                                           *)
@@ -56,6 +57,8 @@ CONST
   FLCASE       =                       16;
   FLALTERNATIVE*=                      17;
   FLMODULE     =                       20;
+  
+  MaxKeyWords* =                      128;                 (* KlS, 2003OCT24 *)
    
 
 TYPE
@@ -69,6 +72,13 @@ TYPE
     startFlag,
     endFlag:                           INTEGER;
   END (* LineAnalyzerT *);
+  
+
+VAR                                                        (* KlS, 2003OCT24 *)
+  KeyWords*:                           ARRAY MaxKeyWords OF ARRAY 32 OF CHAR;
+  KeyWordLength*:                      ARRAY MaxKeyWords OF LONGINT;
+  i,
+  NoOfKeyWords*:                       LONGINT;
   
   
 (*********************************************************************************************)
@@ -84,21 +94,21 @@ END IsIdentChar;
 
 
 (*********************************************************************************************)
-PROCEDURE GetIdent                    (VAR txt:            ARRAY OF CHAR; 
-                                       VAR ident:          ARRAY OF CHAR;
-                                       VAR inx:            LONGINT);
+PROCEDURE GetIdent*                   (VAR Text:           ARRAY OF CHAR; 
+                                       VAR Token:          ARRAY OF CHAR;
+                                       VAR Index:          LONGINT);
 (* liefert einen Textbereich zurück *)
 VAR
   i:                                   LONGINT;
 
 BEGIN
   i        :=  0;
-  WHILE IsIdentChar(txt[inx]) & (i<LEN(ident)-1) DO
-    ident[i]   := txt[inx];
+  WHILE IsIdentChar(Text[Index]) & (i<LEN(Token)-1) DO
+    Token[i]   := Text[Index];
     INC(i);
-    INC(inx);
+    INC(Index);
   END;
-  ident[i] := 0X;
+  Token[i] := 0X;
 END GetIdent;
 
 
@@ -464,7 +474,8 @@ BEGIN
       END;                                                 (* KlS, 2002JUL16 *)
       Strings.AppendChar(txt, ";");
       done := text.InsertLine(txt, row+1);
-    ELSIF (line.startFlag=FLREPEAT) & (nextLine.indent#line.indent+Options.indentWidth) THEN
+    ELSIF (line.startFlag=FLREPEAT) & ~(nextLine.startFlag=FLUNTIL) 
+          & (nextLine.indent<=line.indent) THEN
       InitIndent(line.indent, txt);
       Strings.Append(txt, "UNTIL ;");
       done := text.InsertLine(txt, row+1);
@@ -480,5 +491,76 @@ END Analyze;
 (*********************************************************************************************)
 (*********************************************************************************************)
 BEGIN;
-  ;
+  KeyWords[01] := "ABS";                                   (* KlS, 2003OCT24 *)
+  KeyWords[02] := "ASH";
+  KeyWords[03] := "ASSERT";
+  KeyWords[04] := "ARRAY";
+  KeyWords[05] := "BEGIN";
+  KeyWords[06] := "BOOLEAN";
+  KeyWords[07] := "BY";
+  KeyWords[08] := "CAP";
+  KeyWords[09] := "CASE";
+  KeyWords[10] := "CHAR";
+  KeyWords[11] := "CHR";
+  KeyWords[12] := "CONST";
+  KeyWords[13] := "COPY";
+  KeyWords[14] := "DEC";
+  KeyWords[15] := "DEFINITION";
+  KeyWords[16] := "DISPOSE";
+  KeyWords[17] := "DIV";
+  KeyWords[18] := "DO";
+  KeyWords[19] := "ELSE";
+  KeyWords[20] := "ELSIF";
+  KeyWords[21] := "END";
+  KeyWords[22] := "ENTIER";
+  KeyWords[23] := "EXCL";
+  KeyWords[24] := "EXIT";
+  KeyWords[25] := "FALSE";
+  KeyWords[26] := "FOR";
+  KeyWords[27] := "HALT";
+  KeyWords[28] := "IF";
+  KeyWords[29] := "IMPORT";
+  KeyWords[30] := "IN";
+  KeyWords[31] := "INC";
+  KeyWords[32] := "INCL";
+  KeyWords[33] := "INTEGER";
+  KeyWords[34] := "IS";
+  KeyWords[35] := "LEN";
+  KeyWords[36] := "LONG";
+  KeyWords[37] := "LONGINT";
+  KeyWords[38] := "LONGREAL";
+  KeyWords[39] := "LOOP";
+  KeyWords[40] := "MAX";
+  KeyWords[41] := "MIN";
+  KeyWords[42] := "MOD";
+  KeyWords[43] := "MODULE";
+  KeyWords[44] := "NEW";
+  KeyWords[45] := "NIL";
+  KeyWords[46] := "ODD";
+  KeyWords[47] := "OF";
+  KeyWords[48] := "OR";
+  KeyWords[49] := "ORD";
+  KeyWords[50] := "POINTER";
+  KeyWords[51] := "PROCEDURE";
+  KeyWords[52] := "REAL";
+  KeyWords[53] := "RECORD";
+  KeyWords[54] := "REPEAT";
+  KeyWords[55] := "RETURN";
+  KeyWords[56] := "SHORT";
+  KeyWords[57] := "SET";
+  KeyWords[58] := "SHORT";
+  KeyWords[59] := "SHORTINT";
+  KeyWords[60] := "SIZE";
+  KeyWords[61] := "THEN";
+  KeyWords[62] := "TO";
+  KeyWords[63] := "TRUE";
+  KeyWords[64] := "TYPE";
+  KeyWords[65] := "UNTIL";
+  KeyWords[66] := "VAR";
+  KeyWords[67] := "WHILE";
+  KeyWords[68] := "WITH";
+  NoOfKeyWords := 68;                                      (* KlS, 2003OCT24 *)
+  FOR i:=1 TO NoOfKeyWords DO                              (* KlS, 2003OCT24 *)
+    KeyWordLength[i]   := Strings.Length(KeyWords[i]);
+  END (* FOR i:=1 TO NoOfKeyWords *);
 END Syntax.

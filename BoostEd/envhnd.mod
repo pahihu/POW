@@ -60,22 +60,23 @@ BEGIN
                                   SYSTEM.ADR(Options.printerFontName),
                                   Options.FONTNAMELEN,
                                   SYSTEM.ADR(ini));
-  Options.autoIndent:=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("AutoIndent"),1,SYSTEM.ADR(ini)));
-  Options.tabsize   :=WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("Tabsize"),4,SYSTEM.ADR(ini));
-  Options.useTabs   :=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("UseTabs"),1,SYSTEM.ADR(ini)));
-  Options.mouse     :=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("Mouse"),0,SYSTEM.ADR(ini)));
-  Options.fontSize  :=WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("FontSize"),12,SYSTEM.ADR(ini));
-  Options.printerFontSize:=WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrinterFontSize"),10,SYSTEM.ADR(ini));
-  Options.syntax    :=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("Oberon2Syntax"),1,SYSTEM.ADR(ini)));
-  Options.smartDel  :=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("SmartLineMerge"),1,SYSTEM.ADR(ini)));
-  Options.indentWidth:=WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("IndentWidth"),2,SYSTEM.ADR(ini));
-  Options.colorComments:=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("ColorComments"),1,SYSTEM.ADR(ini)));
-  Options.printMarginLeft   := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginLeft"),40,SYSTEM.ADR(ini));
-  Options.printMarginRight  := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginRight"),40,SYSTEM.ADR(ini));
-  Options.printMarginTop    := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginTop"),60,SYSTEM.ADR(ini));
-  Options.printMarginBottom := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginBottom"),100,SYSTEM.ADR(ini));
-  Options.printDate:=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintDate"),1,SYSTEM.ADR(ini)));
-  Options.printLineNumbers:=SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintLineNumbers"),1,SYSTEM.ADR(ini)));
+  Options.autoIndent           := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("AutoIndent"),1,SYSTEM.ADR(ini)));
+  Options.tabsize              := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("Tabsize"),4,SYSTEM.ADR(ini));
+  Options.useTabs              := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("UseTabs"),1,SYSTEM.ADR(ini)));
+  Options.mouse                := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("Mouse"),0,SYSTEM.ADR(ini)));
+  Options.fontSize             := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("FontSize"),12,SYSTEM.ADR(ini));
+  Options.printerFontSize      := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrinterFontSize"),10,SYSTEM.ADR(ini));
+  Options.syntax               := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("Oberon2Syntax"),1,SYSTEM.ADR(ini)));
+  Options.smartDel             := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("SmartLineMerge"),1,SYSTEM.ADR(ini)));
+  Options.indentWidth          := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("IndentWidth"),2,SYSTEM.ADR(ini));
+  Options.colorComments        := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("ColorComments"),1,SYSTEM.ADR(ini)));
+  Options.printMarginLeft      := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginLeft"),40,SYSTEM.ADR(ini));
+  Options.printMarginRight     := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginRight"),40,SYSTEM.ADR(ini));
+  Options.printMarginTop       := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginTop"),60,SYSTEM.ADR(ini));
+  Options.printMarginBottom    := WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintMarginBottom"),100,SYSTEM.ADR(ini));
+  Options.printDate            := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintDate"),1,SYSTEM.ADR(ini)));
+  Options.printLineNumbers     := SYSTEM.VAL(BOOLEAN,WB.GetPrivateProfileIntA(SYSTEM.ADR(SECTION),SYSTEM.ADR("PrintLineNumbers"),1,SYSTEM.ADR(ini)));
+
   Strings.HexStr(GlobWin.RGB(Options.COMMENT_RED,
                              Options.COMMENT_GREEN,
                              Options.COMMENT_BLUE),default);
@@ -85,7 +86,7 @@ BEGIN
                                   SYSTEM.ADR(buf),
                                   BUFLEN,
                                   SYSTEM.ADR(ini));
-  Options.commentColor:=Strings.Val(buf);
+  Options.CommentColor:=Strings.Val(buf);
 END ReadIniFile;
 
 
@@ -160,7 +161,7 @@ BEGIN
   InsertIniInt("PrintMarginBottom",Options.printMarginBottom,ini);
   InsertIniBool("PrintDate",Options.printDate,ini);
   InsertIniBool("PrintLineNumbers",Options.printLineNumbers,ini);
-  InsertIniHexInt("CommentColor",Options.commentColor,ini);
+  InsertIniHexInt("CommentColor",Options.CommentColor,ini);
 END WriteIniFile;  
  
 END EnvHnd.    

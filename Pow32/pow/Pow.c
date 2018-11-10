@@ -1,27 +1,21 @@
-/*****************************************************************************
- *                                                                           *
- * PROGRAM:            Pow.c                                                 *
- *                                                                           *
- * FUNCTIONS:                                                                *
- *   WinMain()         Calls the initialization function and processes       *
- *                     message loop                                          *
- *   FrameWndProc()    Window function for the "frame" window, which         *
- *                     controls the menu and contains the MDI document       *
- *                     windows as child windows.                             *
- *   MDIChildWndProc() Window function for the individual document windows   *
- *   CloseAllChildren  Destroys all MDI child windows.                       *
- *   AboutDlgProc()    Dialog function for the About dialog.                 *
- *   Error()           Flashes an error messagebox.                          *
- *   QueryCloseChild() Prompts for saving current MDI child window.          *
- *   QueryCloseAllChildren()                                                 *
- *                     Asks whether it is OK to close down app.              *
- *                                                                           *
- * AUTHORS:                                                                  *
- *             FIM     Institut für Informationsverarbeitung und Mikroprozessortechnik, University Linz
- *   2000DEC03 StW     Steve Walker                                          *
- *                     Problem 02.001 fixed                                  *
- *                                                                           *
- *****************************************************************************/
+/***************************************************************************
+ *
+ * PROGRAM:   Pow.c
+ *
+ * FUNCTIONS: 
+ * WinMain()         Calls the initialization function and processes 
+ *                   message loop
+ * FrameWndProc()    Window function for the "frame" window, which 
+ *                   controls the menu and contains the MDI document 
+ *                   windows as child windows.
+ * MDIChildWndProc() Window function for the individual document windows
+ * CloseAllChildren  Destroys all MDI child windows.
+ * AboutDlgProc()    Dialog function for the About dialog.
+ * Error()           Flashes an error messagebox.
+ * QueryCloseChild() Prompts for saving current MDI child window.
+ * QueryCloseAllChildren() Asks whether it is OK to close down app.
+ *
+ ***************************************************************************/
 
 #include <stdlib.h>
 #include <direct.h>
@@ -1065,8 +1059,9 @@ LONG FAR PASCAL _export MDIChildWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
             char txt[20];
             GetWindowText(hwnd,(LPSTR)txt,sizeof(txt));
             if (!stricmp((LPSTR)txt,MESSAGEWINDOW)) msgWnd = 0;
+            return DefMDIChildProc (hwnd, msg, wParam, lParam); /* 2002MAY02, KlS */
         }
-        return DefMDIChildProc (hwnd, msg, wParam, lParam);
+        /* return DefMDIChildProc (hwnd, msg, wParam, lParam);  2002MAY02, KlS; statement eliminated */
         break;
 
     case WM_SIZE:
@@ -1113,25 +1108,25 @@ LONG FAR PASCAL _export MDIChildWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPAR
             break;
 
         case IDM_FILESAVE: {
-                                        int ok;
+					int ok;
           /* -- Do not save message windows -- */
-                                        if (IsEditWindow(hwnd)) {
+					if (IsEditWindow(hwnd)) {
 
-                                                // Steve Walker 27-Nov-00
-                                                // Fix for Save All bug
-                                                // SetFocus BEFORE save action
-                                                SetFocus(hwnd);
+						// Steve Walker 27-Nov-00
+						// Fix for Save All bug
+						// SetFocus BEFORE save action
+						SetFocus(hwnd);
 
-                                                if (GetWindowWord(hwnd, GWW_UNTITLED)) {
-                                                        ok = ChangeFile(hwnd);                                                                  /* save as */
-                                                } else {
-                                                        ok = SaveFile(hwnd);                                                                            /* save file */
-                                                }
-                                                if (ok) NewModified(FALSE);
-                                                //SetFocus(hwnd);
-                                        }
+						if (GetWindowWord(hwnd, GWW_UNTITLED)) {
+							ok = ChangeFile(hwnd);									/* save as */
+						} else {
+							ok = SaveFile(hwnd);										/* save file */
+						}
+						if (ok) NewModified(FALSE);
+						//SetFocus(hwnd);
+					}
           break;
-                                }
+				}
 
         case IDM_COMPCOMP:
           /* rename untitled ? */
@@ -1207,16 +1202,16 @@ LONG OnFrameActivate(HWND hwnd, WPARAM wParam, LPARAM lParam) {
 
 LONG OnFrameInitMenu(HANDLE hmenu) {
 
-        char buf[256];
-        int  canundo;
-        char dir[MAXPATHLENGTH];
-        char drv[4];
-        char ext[MAXPATHLENGTH];
-        HWND hWndActive;
-        int  i;
+	char buf[256];
+	int  canundo;
+	char dir[MAXPATHLENGTH];
+	char drv[4];
+	char ext[MAXPATHLENGTH];
+	HWND hWndActive;
+	int  i;
   char menuTxt[256];
-        int  n;
-        char nam[MAXPATHLENGTH];
+	int  n;
+	char nam[MAXPATHLENGTH];
   int  status;
 
   /* Is there any active child to talk to? */
@@ -1360,12 +1355,12 @@ LONG OnFrameMenuSelect(HMENU hMenu, UINT menuItem, UINT menuFlags) {
   int ids;               
   char buf[MAXPATHLENGTH];
 
-        /* -- initialise -- */
-        ids = 0;
-        strcpy(buf, "");
+	/* -- initialise -- */
+	ids = 0;
+	strcpy(buf, "");
 
-        /* -- if hMenu is NULL, Windows has closed the menu -- */
-        if (hMenu) {
+	/* -- if hMenu is NULL, Windows has closed the menu -- */
+	if (hMenu) {
 
     /* -- set resource identifier -- */
     switch (menuItem) {
@@ -1428,7 +1423,7 @@ LONG OnFrameMenuSelect(HMENU hMenu, UINT menuItem, UINT menuFlags) {
                        
     /* -- load text from resource table -- */
     if (ids) LoadString(hInst, ids, (LPSTR)buf, sizeof(buf));
-        }        
+	}        
 
   /* -- show text -- */
   NewMessage((LPSTR)buf, FALSE);
@@ -1452,7 +1447,7 @@ LONG OnFrameMenuSelect(HMENU hMenu, UINT menuItem, UINT menuFlags) {
 VOID NEAR PASCAL SaveAllChildren () {
 
   HWND hwnd;
-        HWND hedit;
+	HWND hedit;
   char name[20];
  
   // Is there a child window?
@@ -1475,30 +1470,30 @@ VOID NEAR PASCAL SaveAllChildren () {
 
 BOOL CALLBACK SaveAllCallback(HWND hwnd, LPARAM lParam)
 {
-        char name[20];
+	char name[20];
 
-        // Save edit controls only
-        if (GetWindowLong(hwnd, GWL_HWNDEDIT))
-        {
-                GetClassName(hwnd, (LPSTR)name, sizeof(name));
-                if (!stricmp(name, "powchild"))
-                {
-                        SendMessage(hwnd, WM_COMMAND, IDM_FILESAVE, 0L);
-                }
-        }
+	// Save edit controls only
+	if (GetWindowLong(hwnd, GWL_HWNDEDIT))
+	{
+		GetClassName(hwnd, (LPSTR)name, sizeof(name));
+		if (!stricmp(name, "powchild"))
+		{
+			SendMessage(hwnd, WM_COMMAND, IDM_FILESAVE, 0L);
+		}
+	}
 
-        return TRUE;
+	return TRUE;
 }
 
 VOID NEAR PASCAL SaveAllChildren()
 {
-        HWND hWnd;
-        hWnd = GetActiveEditWindow(hwndMDIClient);      
-        
-        // Cycle through child windows
-        EnumChildWindows(hwndMDIClient, SaveAllCallback, 0);
+	HWND hWnd;
+	hWnd = GetActiveEditWindow(hwndMDIClient);	
+	
+	// Cycle through child windows
+	EnumChildWindows(hwndMDIClient, SaveAllCallback, 0);
 
-        SetFocus(hWnd); // restore original active window
+	SetFocus(hWnd);	// restore original active window
 }
 
 // SW end
@@ -1514,21 +1509,21 @@ VOID NEAR PASCAL SaveAllChildren()
 
 LONG OnFrameCommand(HWND hwnd, WPARAM wParam, LPARAM lParam) {
 
-        HWND hWndActive;                                /* active MDI child window */
+	HWND hWndActive;				/* active MDI child window */
 
   switch (LOWORD(wParam)) {
 
-                /* -- Compile -- */
-          case IDM_COMPCOMP:
+		/* -- Compile -- */
+	  case IDM_COMPCOMP:
       SendMessage(GetActiveEditWindow(hwndMDIClient), WM_COMMAND, IDM_COMPCOMP, 0L);
       break;
 
-                /* -- Build Project -- */
+		/* -- Build Project -- */
     case IDM_COMPBUILD:
       BuildProject(GetActiveEditWindow(hwndMDIClient));
       break;
 
-                /* -- Make Project -- */
+		/* -- Make Project -- */
     case IDM_COMPMAKE: {
       int uptodate;
       if (MakeProject(GetActiveEditWindow(hwndMDIClient), &uptodate, FALSE) && uptodate)
@@ -1536,12 +1531,12 @@ LONG OnFrameCommand(HWND hwnd, WPARAM wParam, LPARAM lParam) {
       }
       break;
 
-                /* -- Link Project -- */
+		/* -- Link Project -- */
     case IDM_COMPLINK:
       LinkOnlyProject(GetActiveEditWindow(hwndMDIClient));    
       break;
 
-                /* -- Open Project -- */
+		/* -- Open Project -- */
     case IDM_COMPOPENPRJ:
       if (*actPrj)
         WriteProject((LPSTR)actPrj);
@@ -1550,27 +1545,27 @@ LONG OnFrameCommand(HWND hwnd, WPARAM wParam, LPARAM lParam) {
       OpenProject();
       break;
 
-                /* -- Edit Project -- */
+		/* -- Edit Project -- */
     case IDM_COMPEDITPRJ:
       EditProject();
       break;
 
-                /* -- Save as Project -- */
+		/* -- Save as Project -- */
     case IDM_COMPSAVEASPRJ:
       SaveAsProject();
       break;
 
-                /* -- Close Project -- */
+		/* -- Close Project -- */
     case IDM_COMPCLOSPRJ:
       CloseProject(TRUE);
       break;
 
-                /* -- Save Project as Template -- */
+		/* -- Save Project as Template -- */
     case IDM_COMPSAVETEMP:
       WriteTemplate();
       break;
 
-                /* -- Run -- */
+		/* -- Run -- */
     case IDM_RUNRUN:
       /* Run project executable */
       RunProject(hwnd);
@@ -1581,17 +1576,17 @@ LONG OnFrameCommand(HWND hwnd, WPARAM wParam, LPARAM lParam) {
       GetRunArgs();
       break;
 
-                /* -- Editor Options -- */
+		/* -- Editor Options -- */
     case IDM_OPTEDIT:
       EditEditOptions();
       break;
 
-                /* -- Compiler Options -- */
+		/* -- Compiler Options -- */
     case IDM_OPTCOMP:
       CompilerOptions(hwnd);
       break;
 
-                /* -- Linker Options -- */
+		/* -- Linker Options -- */
     case IDM_OPTLINK:
       LinkerOptions(hwnd);
       break;

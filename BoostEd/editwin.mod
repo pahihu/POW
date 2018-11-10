@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*  Module EditWin                                         V 1.00.19          *)
+(*  Module EditWin                                         V 1.00.20          *)
 (*                                                                            *)
 (*  This module contains the implementation of the EditWinT class.            *)
 (*  The EditWinT class extends the TextWin.WinDescT class with the            *)
@@ -771,7 +771,7 @@ BEGIN
     GlobWin.Beep;
   END;
   IF Options.colorComments & nestingChanged THEN
-    win.ShowTextRange(win.row,win.text.lines);
+    win.ShowTextRange(win.row, win.text.lines);
   ELSE
     win.ShowTextLine(win.row);                     
   END;

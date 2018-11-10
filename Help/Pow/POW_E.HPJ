@@ -1,27 +1,14 @@
+; This file is maintained by HCW. Do not modify this file directly.
+
 [OPTIONS]
-INDEX=Pow_Hilfe_Index
+COMPRESS=60 Hall Zeck
+LCID=0x409 0x0 0x0 ; English (United States)
+REPORT=Yes
 TITLE=Pow! Help
-COMPRESS=true
-WARNING=1  
+HLP=pow_e.hlp
 
 [FILES]
-pow_e.rtf 
-
-[BITMAPS]
-open.bmp
-save.bmp
-comp.bmp
-make.bmp
-run.bmp
-combo.bmp
-status.bmp
-drwop.bmp
-drwcl.bmp
-drwopgr.bmp
-drvhard.bmp
-drvdisk.bmp
-drvnet.bmp
+pow_e.rtf
 
 [MAP]
 #include <pow_e.h>
-

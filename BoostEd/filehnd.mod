@@ -1,40 +1,33 @@
-(******************************************************************************)
-(*  Module FileHnd                                                            *)
-(*                                                                            *)
-(*  This module contains the procedures which read from and write to          *)
-(*  text files.                                                               *)
-(*----------------------------------------------------------------------------*)
-(*  1.10   2001OCT03   KlS     SaveFile:                                      *)
-(*                             automatic version incrementation               *)
-(*                             "V 1.23.46" is incremented while saving        *)
-(*                             the file                                       *)
-(*                                                                            *)
-(******************************************************************************)
+(******************************************************************************
+ *  Module FileHnd
+ *  
+ *  This module contains the procedures which read from and write to
+ *  text files.
+ ******************************************************************************)
 
 MODULE FileHnd;
 
 
-IMPORT 
-  SYSTEM, 
-  WU:=WinUser, WD:=WinDef, WB:=WinBase, WN:=WinNT,
-  Strings, Utils,
-  List:=ListSt, TWin:=TextWin, Options, GlobWin;
+IMPORT SYSTEM, 
+       WU:=WinUser, WD:=WinDef, WB:=WinBase, WN:=WinNT,
+       Str:=Strings,
+       List:=ListSt, TWin:=TextWin, Options, GlobWin;
 
 
 CONST 
-  FILEPARTLEN          =               32000;
-  CR                   =               0DX;
-  LF                   =               0AX;
-  EOF                  =               1AX;
+  FILEPARTLEN=32000;
+  CR=0DX;
+  LF=0AX;
+  EOF=1AX;
 
 
 VAR
-  filepart:                            ARRAY FILEPARTLEN OF CHAR; 
+  filepart : ARRAY FILEPARTLEN OF CHAR; 
     (* This variable should be local to LoadFile. It has been declared 
        as a global variable to reduce stack usage. *)
     
-
 (**********************************************************************************************)
+
 PROCEDURE DisplayError(title: ARRAY OF CHAR; msg: ARRAY OF CHAR);
 (* zeigt eine Messagebox an mit einer Fehlermeldung *)
 
@@ -45,8 +38,8 @@ BEGIN
   r := WU.MessageBoxA(WD.NULL, SYSTEM.ADR(msg), SYSTEM.ADR(title), WU.MB_OK);
 END DisplayError;
 
-
 (**********************************************************************************************)
+
 PROCEDURE LoadFile*(hEdit:WD.HWND;name:WD.LPSTR):INTEGER;
 (* öffnet bestimmte Datei und lädt sie in den Speicher unter Verwendung des Moduls ListStruct *)
 (* Rückgabewert : 1 (erfolgreich), 0 (Fehler)                                                 *)
@@ -108,10 +101,10 @@ BEGIN
   pos:=0;
   WHILE NextChar(char) DO
     IF pos >=List.MAXLENGTH THEN   
-      Strings.Str(LONG(List.MAXLENGTH), valstr);
+      Str.Str(LONG(List.MAXLENGTH), valstr);
       infostr:="Line is longer than ";
       infostr2:=" chars. Loading aborted.";
-      Strings.Append(infostr,valstr);Strings.Append(infostr,infostr2);
+      Str.Append(infostr,valstr);Str.Append(infostr,infostr2);
       GlobWin.DisplayError("Error in MODULE Filehandling",infostr);
       PrepExit;
     END;
@@ -147,37 +140,20 @@ BEGIN
   RETURN 1;
 END LoadFile;
 
-
 (**********************************************************************************************)
+
 PROCEDURE SaveFile*(hEdit:WD.HWND; name: WD.LPSTR):INTEGER;
 (* Speichert bestimmte Datei vom Speicher auf Festplatte *)
 (* Rückgabewert : 1 (erfolgreich), 0 (Fehler)            *)
-(*  2001OCT03  KlS     automatic version incrementation  *)
-(*                                                       *)
      
 VAR 
-  hf:                                  WD.HANDLE;
-  len:                                 LONGINT;
-  char:                                CHAR;
-  buffer:                              ARRAY List.MAXLENGTH OF CHAR;
-  win:                                 TWin.WinDesc;
-  crlf:                                ARRAY 3 OF CHAR;     
-  dwWritten:                           WD.DWORD;  (* Anzahl geschriebener Bytes *)
-                                                           (* 2001OCT03, KlS *)
-  i:                                   INTEGER;            (* Index counts the lines *)
-  j:                                   INTEGER;
-  Version,
-  Release,
-  Build:                               LONGINT;
-  Found,
-  SetDate:                             BOOLEAN;
-  Day,
-  Month,
-  Year:                                INTEGER;
-  Number:                              ARRAY   32 OF CHAR;
-  Position,
-  Position0:                           LONGINT;
-  
+  hf           : WD.HANDLE;
+  len          : LONGINT;
+  char         : CHAR;
+  buffer       : ARRAY List.MAXLENGTH OF CHAR;
+  win          : TWin.WinDesc;
+  crlf         : ARRAY 3 OF CHAR;     
+  dwWritten    : WD.DWORD;  (* Anzahl geschriebener Bytes *)
 
 BEGIN
   crlf[0]:=CR;
@@ -185,218 +161,26 @@ BEGIN
   crlf[2]:=0X;
   win:=SYSTEM.VAL(TWin.WinDesc,WU.GetWindowLongA(hEdit,0));
  
-  hf       := WB.CreateFileA(name, WN.GENERIC_WRITE, 0, NIL, WB.CREATE_ALWAYS,
-                             WN.FILE_ATTRIBUTE_NORMAL, WD.NULL);
+  hf := WB.CreateFileA(name, WN.GENERIC_WRITE, 0, NIL, WB.CREATE_ALWAYS,
+    WN.FILE_ATTRIBUTE_NORMAL, WD.NULL);
 
-  IF hf=WB.INVALID_HANDLE_VALUE THEN
-    GlobWin.DisplayError("Error in MODULE Filehandling.","Could not open file for saving. Save aborted.");
-    RETURN 0;    
+  IF hf = WB.INVALID_HANDLE_VALUE THEN
+     GlobWin.DisplayError("Error in MODULE Filehandling.","Could not open file for saving. Save aborted.");
+     RETURN 0;    
   END;
               
-  IF ~(win.text.GetLine(1, buffer, len)) THEN 
-    RETURN 0 
-  END;
+  IF ~(win.text.GetLine( 1, buffer, len)) THEN 
+     RETURN 0 END;
       
-  IF (WB.WriteFile(hf, SYSTEM.ADR(buffer), len, dwWritten, WD.NULL)=0) THEN
-    GlobWin.DisplayError("Error in MODULE Filehandling","Could not write into opened file");
-    RETURN 0; 
-  END;
-  IF (WB.WriteFile(hf, SYSTEM.ADR(crlf), 2, dwWritten, WD.NULL)=0) THEN
-    GlobWin.DisplayError("Error in MODULE Filehandling","Could not write into opened file");
-    RETURN 0; 
-  END;     
+  IF (WB.WriteFile(hf, SYSTEM.ADR(buffer), len, dwWritten, WD.NULL) = 0) THEN
+         GlobWin.DisplayError("Error in MODULE Filehandling","Could not write into opened file");
+         RETURN 0; END;
+  IF (WB.WriteFile(hf, SYSTEM.ADR(crlf), 2, dwWritten, WD.NULL) = 0) THEN
+         GlobWin.DisplayError("Error in MODULE Filehandling","Could not write into opened file");
+         RETURN 0; END;     
   
-  i            := 100;
-  Position0    :=   0;
-  Found        := FALSE;
-  SetDate      := FALSE;
-  Utils.GetDate (Day, Month, Year, j);
-
   WHILE win.text.GetNextLine( buffer, len) DO
     (* zeilenweise schreiben in Datei *)
-    IF i>0 THEN
-      IF SetDate THEN
-        Position := Position0 - 1;
-        LOOP
-          IF ((buffer[Position]<"0") OR (buffer[Position]>"9")) THEN
-            EXIT
-          END;
-          INC(Position);
-          IF ((buffer[Position]<"0") OR (buffer[Position]>"9")) THEN
-            EXIT
-          END;
-          INC(Position);
-          IF ((buffer[Position]<"0") OR (buffer[Position]>"9")) THEN
-            EXIT
-          END;
-          INC(Position);
-          IF ((buffer[Position]<"0") OR (buffer[Position]>"9")) THEN
-            EXIT
-          END;
-          (* four digits in a row: must be the year *)
-  
-          Position               := Position0 - 1;
-          (* write actual year *)
-          Strings.Str(Year, Number);
-          buffer[Position]   := Number[0];
-          buffer[Position+1] := Number[1];
-          buffer[Position+2] := Number[2];
-          buffer[Position+3] := Number[3];
-          (* write actual month *)
-          CASE Month OF
-            1:                                               (* january *)
-              buffer[Position+4] := "J";
-              buffer[Position+5] := "A";
-              buffer[Position+6] := "N";
-            | (*  1 *)
-            2:                                               (* february *)
-              buffer[Position+4] := "F";
-              buffer[Position+5] := "E";
-              buffer[Position+6] := "B";
-            | (*  2 *)
-            3:                                               (* marcg *)
-              buffer[Position+4] := "M";
-              buffer[Position+5] := "A";
-              buffer[Position+6] := "R";
-            | (*  3 *)
-            4:                                               (* april *)
-              buffer[Position+4] := "A";
-              buffer[Position+5] := "P";
-              buffer[Position+6] := "R";
-            | (*  4 *)
-            5:                                               (* may *)
-              buffer[Position+4] := "M";
-              buffer[Position+5] := "A";
-              buffer[Position+6] := "Y";
-            | (*  5 *)
-            6:                                               (* june *)
-              buffer[Position+4] := "J";
-              buffer[Position+5] := "U";
-              buffer[Position+6] := "N";
-            | (*  6 *)
-            7:                                               (* july *)
-              buffer[Position+4] := "J";
-              buffer[Position+5] := "U";
-              buffer[Position+6] := "L";
-            | (*  7 *)
-            8:                                               (* august *)
-              buffer[Position+4] := "A";
-              buffer[Position+5] := "U";
-              buffer[Position+6] := "G";
-            | (*  8 *)
-            9:                                               (* september *)
-              buffer[Position+4] := "S";
-              buffer[Position+5] := "E";
-              buffer[Position+6] := "P";
-            | (*  9 *)
-            10:                                              (* october *)
-              buffer[Position+4] := "O";
-              buffer[Position+5] := "C";
-              buffer[Position+6] := "T";
-            | (* 10 *)
-            11:                                              (* november *)
-              buffer[Position+4] := "N";
-              buffer[Position+5] := "O";
-              buffer[Position+6] := "V";
-            | (* 11 *)
-            12:                                              (* december *)
-              buffer[Position+4] := "D";
-              buffer[Position+5] := "E";
-              buffer[Position+6] := "C";
-            (* 12 *)
-            ELSE                                             (* unknown *)
-              buffer[Position+4] := "x";
-              buffer[Position+5] := "x";
-              buffer[Position+6] := "x";
-          END;
-          (* write actual day *)
-          Strings.Str(Day, Number);
-          IF Day<10 THEN
-            buffer[Position+7] := "0";
-            buffer[Position+8] := Number[0];
-          ELSE
-            buffer[Position+7] := Number[0];
-            buffer[Position+8] := Number[1];
-          END (* IF Day<10 *);
-          EXIT;
-          
-        END (* LOOP *);
-        SetDate  := FALSE;
-      END;
-      
-      (* find version string *)
-      Position := Strings.Pos("V ", buffer, 0);
-      IF Position>0 THEN
-        LOOP
-          Position0 := Position;
-          INC(Position, 2);
-          IF buffer[Position]#"." THEN
-            EXIT
-          END;
-          INC(Position, 3);
-          IF buffer[Position]#"." THEN
-            EXIT
-          END;
-          IF ~Found THEN
-            (* read version, release, build *)
-            Position   := Position0 + 1;
-            Number[0]  := buffer[Position];
-            Number[1]  := 0X;
-            Version    := Strings.Val(Number);
-            INC(Position, 2);
-            Number[0]  := buffer[Position];
-            Number[1]  := buffer[Position+1];
-            Number[2]  := 0X;
-            Release    := Strings.Val(Number);
-            INC(Position, 3);
-            Number[0]  := buffer[Position];
-            Number[1]  := buffer[Position+1];
-            Number[2]  := 0X;
-            Build      := Strings.Val(Number);
-            
-            (* increment the version info *)
-            INC(Build);
-            IF Build>99 THEN
-              Build := 0;
-              INC(Release);
-              IF Release>99 THEN
-                Release := 0;
-                INC(Version)
-              END;
-            END;
-            Found    := TRUE;
-            SetDate  := TRUE;
-          END (* IF ~Found *);
-  
-          (* write version, release, build *)
-          Position               := Position0 + 1;
-          Strings.Str(Version, Number);
-          buffer[Position]   := Number[0];
-          INC(Position, 2);
-          Strings.Str(Release, Number);
-          IF Number[1]=0X THEN
-            buffer[Position]   := "0";
-            buffer[Position+1] := Number[0];
-          ELSE
-            buffer[Position]   := Number[0];
-            buffer[Position+1] := Number[1];
-          END;
-          INC(Position, 3);
-          Strings.Str(Build, Number);
-          IF Number[1]=0X THEN
-            buffer[Position]   := "0";
-            buffer[Position+1] := Number[0];
-          ELSE
-            buffer[Position]   := Number[0];
-            buffer[Position+1] := Number[1];
-          END;
-          EXIT;
-  
-        END (* LOOP *);
-      END;
-      DEC(i);
-    END;
-    
     IF (WB.WriteFile(hf, SYSTEM.ADR(buffer), len, dwWritten, WD.NULL) = 0) THEN
          GlobWin.DisplayError("Error in MODULE Filehandling","Could not write into opened file");
          RETURN 0; END;                 
@@ -417,6 +201,7 @@ BEGIN
 END SaveFile;
 
 (**********************************************************************************************)
+                                          
 PROCEDURE GetNextBuffer*(hEdit:WD.HWND; 
                          VAR buf:ARRAY OF CHAR; 
                          size:LONGINT):LONGINT;
@@ -487,8 +272,5 @@ BEGIN
   win.position:=0;
   RETURN GetNextBuffer(hEdit,buf,size);
 END GetFirstBuffer;
-
-
-(***********************************************************************************************)   
 
 END FileHnd.

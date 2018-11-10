@@ -31,6 +31,8 @@ SET LIBCMD="Lib.exe"
 
 REM -- Test Lib-Command --
 %LIBCMD% > NUL
+goto LabelContinue
+
 if not errorlevel 255 goto LabelContinue
   cls
   echo.
@@ -57,7 +59,7 @@ echo.
 pause
 
 REM -- build static run-tim system without garbage collector --
-%LIBCMD% /OUT:RTS32S.LIB rtsoberon.obj rtsstr.obj rtswin.obj
+%LIBCMD% /OUT:RTS32S.LIB /LINK50COMPAT rtsoberon.obj rtsstr.obj rtswin.obj
 IF ERRORLEVEL 1 GOTO LabelExit
 
 rem -- description for dynamic run-time system with garbage collector --
@@ -71,7 +73,7 @@ echo.
 pause
 
 REM -- build static run-time system with garbage collector --
-%LIBCMD% /OUT:RTS32SGC.LIB rtsoberon.obj rtsstr.obj rtswin.obj
+%LIBCMD% /OUT:RTS32SGC.LIB /LINK50COMPAT rtsoberon.obj rtsstr.obj rtswin.obj
 IF ERRORLEVEL 1 GOTO LabelExit
 
 :LabelExit

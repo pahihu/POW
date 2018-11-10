@@ -11,7 +11,6 @@
 ;
 
 [OPTIONS]
-HCW=0
 ; The optional ROOT= entry sets the working directory for the Help Compiler
 ; ROOT=C:\PROJECT
 ; The optional BMROOT= entry sets forth the directories which the
@@ -33,12 +32,12 @@ HCW=0
 ; smaller, faster loading .HLP files.  However, using compression
 ; increases Compile times.
 ; COMPRESS=YES, ON, OFF, NO, TRUE or FALSE
-LCID=0xc07 0x0 0x0 ;German (Austrian)
+LCID=0xc07 0x0 0x0 ; German (Austria)
 REPORT=No
 CONTENTS=IDH_CONTENTS
 TITLE=Oberon-2 Interface Options
 BUILD=WINDOWS
-BMROOT=;C:\FOO
+BMROOT=C:\FOO
 HLP=.\OBERON2.hlp
 
 [FILES]

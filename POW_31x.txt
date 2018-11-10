@@ -1,0 +1,46 @@
+POW self-extracting package
+===========================
+
+This package contains the following items:
+
+- pow32_30b version
+- patches from the POW32 group's Files/Patches folder
+
+The included patches are:
+
+- BoostEd.Source.zip
+- Boosted32.zip
+- Opal.zip
+- RTS.zip
+- obrn32.zip
+- pow.zip
+
+    To see the the actual contents of the package, please visit the
+ChangeLog section at the end of this file.
+
+    I have recompiled the C sources with Visual C++ 6.0 and then
+recompiled the whole package with itself. I have made some modifications
+in the batch files for some packages to produce lib files in VC5 format,
+since the linker included with POW understands this format only.
+
+    To install the redistributable DLLs please run the PostInstall.bat
+file, after you extract the package contents in a directory.
+
+NOTE:
+    If you are running Windows 2000 SP4 please use the boosted32_w2k.ell
+and obrn32_w2k.dll files. Rename them to boosted32.ell and obrn32.dll
+respectively.
+
+Regards,
+Andras Pahi
+pahi@info-m.hu
+
+ChangeLog
+=========
+040416  Initial release with a PostInstall batch file
+040426  - missing credits.txt added
+        - comdlg32, kernel32, user32, gdi32 lib files converted
+        - initial configuration settings are added to .\Oberon-2\Config
+        - PostInstall.bat fixed to copy the configuration files
+040824  - fixes for Pow from Klaus Schultze
+040903  - obrn32_w2k.dll and boosted32_w2k.ell are for Windows 2000
