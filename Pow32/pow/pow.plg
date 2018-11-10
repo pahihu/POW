@@ -1,0 +1,59 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: pow - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\Users\Pahi\AppData\Local\Temp\RSP2D7C.tmp" with contents
+[
+/nologo /ML /W3 /GX /Od /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /FR"Release/" /Fp"Release/pow.pch" /YX /Fo"Release/" /Fd"Release/" /FD /c 
+"C:\Programs\Pow\Oberon-2\Src\Pow32\pow\POWOPEN.C"
+]
+Creating command line "cl.exe @C:\Users\Pahi\AppData\Local\Temp\RSP2D7C.tmp" 
+Creating temporary file "C:\Users\Pahi\AppData\Local\Temp\RSP2D8C.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /stack:0x10000000 /subsystem:windows /incremental:no /pdb:"Release/pow.pdb" /machine:I386 /def:".\pow32.def" /out:"Release/pow.exe" 
+".\Release\POW.OBJ"
+".\Release\POWBUG.OBJ"
+".\Release\POWCOMP.OBJ"
+".\Release\powCompiler.obj"
+".\Release\POWDDE.OBJ"
+".\Release\POWED.OBJ"
+".\Release\POWFILE.OBJ"
+".\Release\POWFIND.OBJ"
+".\Release\POWINIT.OBJ"
+".\Release\powintro.obj"
+".\Release\POWOPEN.OBJ"
+".\Release\POWOPTS.OBJ"
+".\Release\POWPRINT.OBJ"
+".\Release\POWPROJ.OBJ"
+".\Release\POWRIBB.OBJ"
+".\Release\POWRUN.OBJ"
+".\Release\POWSTAT.OBJ"
+".\Release\POWTEMP.OBJ"
+".\Release\POWTEXT.OBJ"
+".\Release\POWTOOLS.OBJ"
+".\Release\POW.res"
+"\Programs\Pow\Oberon-2\Src\Pow32\_oberon\Release\_oberon32.lib"
+"\Programs\Pow\Oberon-2\Src\Pow32\link32\Release\link32.lib"
+"\Programs\Pow\Oberon-2\Src\Pow32\powsup\Release\powsup32.lib"
+"\Programs\Pow\Oberon-2\Src\Pow32\powedit\Release\powedit.lib"
+]
+Creating command line "link.exe @C:\Users\Pahi\AppData\Local\Temp\RSP2D8C.tmp"
+<h3>Output Window</h3>
+Compiling...
+POWOPEN.C
+Linking...
+.\pow32.def : warning LNK4017: CODE statement not supported for the target platform; ignored
+.\pow32.def : warning LNK4017: DATA statement not supported for the target platform; ignored
+   Creating library Release/pow.lib and object Release/pow.exp
+
+
+
+<h3>Results</h3>
+pow.exe - 0 error(s), 2 warning(s)
+</pre>
+</body>
+</html>

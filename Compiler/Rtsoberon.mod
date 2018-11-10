@@ -24,7 +24,7 @@ IMPORT Str := String, SYSTEM, W := Win32;
   
 CONST
   
-  MAX_ID_LEN* = 45;
+  MAX_ID_LEN* = 128;   (* 080429AP, was 45 *)
 
   MAXBASE       = 10;  (* maximum base classes possible; compiler restriction *)
   MAXCODEMODULE = 100;
@@ -82,12 +82,17 @@ TYPE
    *        ptr to open array of commands 
    *
    ***********************************************************************)
+  CommandT = RECORD   (* 080429AP, Command fixes *)
+    proc: PROCEDURE;
+    name: ARRAY MAX_ID_LEN OF CHAR;
+  END;
+
   ModuleDescriptorT = RECORD
     moduleName-:      POINTER TO ARRAY MAX_ID_LEN OF CHAR;
     globalDataSize-:  LONGINT;
     globalData-:      SYSTEM.PTR; 
     typeDescList-:    POINTER TO ARRAY OF SYSTEM.PTR;
-    commandList-:     POINTER TO ARRAY OF SYSTEM.PTR;
+    commandList:      POINTER TO ARRAY OF CommandT;
   END;
   ModuleDescriptorP = POINTER TO ModuleDescriptorT;
 

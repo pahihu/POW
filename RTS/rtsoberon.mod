@@ -49,7 +49,7 @@ MODULE RTSOberon;
     (* -- restrictions -- *)
     MAXPATH       = 256;
     MAXBASE       = 10;  (* maximum base classes possible; compiler restriction *)
-    MAX_ID_LEN*   = 45;  (* length of identifiers; compiler restriction         *)
+    MAX_ID_LEN*   = 128; (* length of identifiers; compiler restriction         *)
 
     (* -- memory management -- *)
     SUBBLOCKSIZE  = 24;  (* overhead for memory allocation *)
@@ -173,14 +173,20 @@ MODULE RTSOberon;
      *        ptr to open array of commands 
      *
      ***********************************************************************)
-    ModuleDescriptorT = RECORD
+    CommandT- = RECORD
+      proc-: PROCEDURE;
+      name-: Name;
+    END;
+    CommandP- = POINTER TO CommandT;
+
+    ModuleDescriptorT- = RECORD
       moduleName-:      NameP;
       globalDataSize-:  LONGINT;
       globalData-:      SYSTEM.PTR; 
       typetagList-:     POINTER TO ARRAY OF SYSTEM.PTR;
-      commandList-:     POINTER TO ARRAY OF SYSTEM.PTR;
+      commandList-:     POINTER TO ARRAY OF CommandT;
     END;
-    ModuleDescriptorP = POINTER TO ModuleDescriptorT;
+    ModuleDescriptorP- = POINTER TO ModuleDescriptorT;
     
     ModuleDescriptorPraefixT = RECORD
       nc-:       INTEGER;
@@ -188,11 +194,6 @@ MODULE RTSOberon;
     END;
     ModuleDescriptorPraefixP = POINTER TO ModuleDescriptorPraefixT;
 
-    CommandT- = RECORD
-      proc-: PROCEDURE;
-      name-: NameP;
-    END;
-    CommandP- = POINTER TO CommandT;
 (*
     CodeModuleT- = RECORD 
       path-:         ARRAY MAXPATH OF CHAR;
@@ -1011,8 +1012,8 @@ BEGIN
       FOR j := 0 TO LEN(moduleList[i].commandList^) - 1 DO
         cmd := SYSTEM.VAL(CommandP, moduleList[i].commandList[j]);
         LogWriteHex(SYSTEM.VAL(LONGINT, cmd));
-(*      LogWriteStrX(cmd^.name, 35);
-        LogWriteHex(SYSTEM.VAL(LONGINT, cmd^.proc));*)
+        LogWriteStrX(cmd^.name, 35);
+        LogWriteHex(SYSTEM.VAL(LONGINT, cmd^.proc));
         LogWriteLn;
       END;
     END;
@@ -2715,6 +2716,17 @@ PROCEDURE LogDisable*();
 BEGIN
   logActive := FALSE;
 END LogDisable;
+
+PROCEDURE XmoduleN*(): LONGINT;
+BEGIN
+  RETURN moduleN;
+END XmoduleN;
+
+PROCEDURE XmoduleList*(i: LONGINT): ModuleDescriptorP;
+BEGIN
+  RETURN moduleList[i];
+END XmoduleList;
+
 
 
 BEGIN

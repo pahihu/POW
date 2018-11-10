@@ -138,7 +138,7 @@ PROCEDURE (p:BitmapPaneP) GetDot*(x,y:LONGINT):INTEGER;
 VAR
   h:LONGINT;
 BEGIN
-  IF WG.GetPixel(p.hmemdc,x,y)=0 THEN RETURN 1 ELSE RETURN 0 END;
+  IF WG.GetPixel(p.hmemdc,x,p.maxY-y)=0 THEN RETURN 1 ELSE RETURN 0 END;
 END GetDot;
  
 PROCEDURE (p:BitmapPaneP) SetDot*(x,y,color:LONGINT);

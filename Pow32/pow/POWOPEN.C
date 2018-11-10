@@ -83,11 +83,17 @@ BOOL FAR FileExists (LPSTR pch)
  *                                                                        *
  **************************************************************************/
 
+BOOL FAR PASCAL _export DummyHookProc (HWND hdlg,WORD msg,WPARAM wParam,LONG lParam)
+{
+	return 0;
+}
+
 void FAR GetFileName (LPSTR lpstr,LPSTR capt,BOOL as,LPEXT ext,int exts,HWND parent)
 {
     int i;
     OPENFILENAME ofn;
     char filter[1000],title[100],*s;
+	FARPROC hookProc;
           
     *filter=0;
     for (i=0;i<exts;i++) {
@@ -104,6 +110,7 @@ void FAR GetFileName (LPSTR lpstr,LPSTR capt,BOOL as,LPEXT ext,int exts,HWND par
        s++;
     }                
     
+    hookProc=MakeProcInstance(DummyHookProc,hInst);
     memset(&ofn,0,sizeof(OPENFILENAME));
 
     ofn.lStructSize=sizeof(OPENFILENAME);
@@ -115,7 +122,8 @@ void FAR GetFileName (LPSTR lpstr,LPSTR capt,BOOL as,LPEXT ext,int exts,HWND par
     ofn.lpstrFileTitle=title;
     ofn.nMaxFileTitle=sizeof(title);
     ofn.lpstrInitialDir=0;
-    ofn.Flags=OFN_PATHMUSTEXIST|OFN_HIDEREADONLY;
+    ofn.lpfnHook=(UINT (CALLBACK *)(HWND,UINT,WPARAM,LPARAM))hookProc;
+    ofn.Flags=OFN_PATHMUSTEXIST|OFN_HIDEREADONLY|OFN_ENABLEHOOK;
 
 	// Steve Walker 3-Dec-2000
 	// Populate ofn struct with capt argument (dialog title)
@@ -137,6 +145,7 @@ void FAR GetFileName (LPSTR lpstr,LPSTR capt,BOOL as,LPEXT ext,int exts,HWND par
        if (*lpstr)       
           AnsiLower(lpstr);
     #endif
+    FreeProcInstance(hookProc);
 }
 
 

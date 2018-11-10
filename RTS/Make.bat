@@ -50,6 +50,7 @@ if not errorlevel 255 goto LabelContinue
 
 rem -- description for dynamic run-time system without garbage collector --
 cls
+del/s/q *.obj *.lib *.dll *.sym *.exp *.tmp
 echo.
 echo 1. Load the project Rts32d.prj.
 echo 2. Set the constant START_GC in the module RTSOberon.mod to FALSE.
