@@ -121,7 +121,7 @@ END Next;
 PROCEDURE (self:PSymList) RemoveCurrent*();
 VAR
   h: PWrapper;
-  l: PWrapper;
+  (*l: PWrapper; @kds not used *)
 BEGIN
   IF (self.rider # NIL) & (self.rider # self.itemChain) THEN
     h := self.rider.next;

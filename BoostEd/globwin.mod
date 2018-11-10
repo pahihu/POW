@@ -31,29 +31,29 @@
 MODULE GlobWin;
 
 IMPORT
-  Strings,
-  WinBase, WinDef, WinNT, WinUser,
+  Strings, 
+  WinBase, WinDef, WinNT, WinUser, 
   SYSTEM;
 
 CONST
-  HELPFILENAME     =                   "BoostEd.hlp";
+  HELPFILENAME         =              "BoostEd.hlp";
 
 VAR
   hInstance*:                          WinDef.HINSTANCE;
 
 
-(*****************************************************************************)
+  (*****************************************************************************)
 PROCEDURE DisplayError*               (Title:              ARRAY OF CHAR;
                                        Message:            ARRAY OF CHAR);
-(* Show a pop-up window with an error message.                               *)
-(* The procedure returns after the user has acknowledged the error message.  *)
+  (* Show a pop-up window with an error message.                               *)
+  (* The procedure returns after the user has acknowledged the error message.  *)
 VAR
   ResultBool:                          WinDef.BOOL;
 BEGIN
   ResultBool   := WinUser.MessageBoxA(WinDef.NULL, 
-                                      SYSTEM.ADR(Message), 
-                                      SYSTEM.ADR(Title), 
-                                      WinUser.MB_OK);
+  SYSTEM.ADR(Message), 
+  SYSTEM.ADR(Title), 
+  WinUser.MB_OK);
 END DisplayError;
 
 
@@ -66,24 +66,24 @@ VAR
   help:                                ARRAY 128 OF CHAR;
   dmyi:                                LONGINT;
 BEGIN
-  ret          := WinBase.GetModuleFileNameA(hInstance,SYSTEM.ADR(help),128);
+  ret          := WinBase.GetModuleFileNameA(hInstance, SYSTEM.ADR(help), 128);
   IF ret=0 THEN
-    DisplayError("Error","Problems getting helpfile");
+    DisplayError("Error", "Problems getting helpfile");
   ELSE
-    i          := ret-1;
+    i          := ret - 1;
     WHILE (i>=0) & (help[i]#"\") DO
       help[i]  := 0X;
       DEC(i);
-    END;
-    Strings.Append(help,HELPFILENAME);
+    END (* WHILE (i>=0) & (help[i]#") *);
+    Strings.Append(help, HELPFILENAME);
 
-    dmyi       := WinUser.WinHelpA(hEdit, SYSTEM.ADR(help), WinUser.HELP_CONTENTS,0);
+    dmyi       := WinUser.WinHelpA(hEdit, SYSTEM.ADR(help), WinUser.HELP_CONTENTS, 0);
     IF dmyi=0 THEN
       tmp      := "The helpfile must reside at ";
-      Strings.Append(tmp,help);
-      DisplayError("HELP",tmp);
-    END;
-  END;
+      Strings.Append(tmp, help);
+      DisplayError("HELP", tmp);
+    END (* IF dmyi=0 *);
+  END (* IF ret=0 *);
 END ShowHelp;
 
 
@@ -102,12 +102,14 @@ PROCEDURE RGB*                        (r,
                                        b:                  INTEGER)
                                       :LONGINT;
 BEGIN
-  RETURN (b*256+g)*256+r;
+  RETURN (b*256 + g)*256+r;
 END RGB;
 
 (*****************************************************************************)
 (*****************************************************************************)
-BEGIN;
+BEGIN
+ ;
   ;
 END GlobWin.
+
 

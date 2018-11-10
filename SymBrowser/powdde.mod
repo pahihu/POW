@@ -1,7 +1,12 @@
+(* @KDS 2005-05-25 : Bugfix: 'Callback' did not return a value
+                     could not increase transfer buffer size: strange results in Browser window...
+*)
+
 MODULE PowDDE;
 
 (********************************************************************************
  * Autor   : Gerhard Kurka                                                      *
+ *           Koen Desaeger                                                   *
  * Project : Symbol file browser ( viewer ) for POW-Oberon-2 symbol-files       *
  ********************************************************************************
  * This Module provides a small set of functions which enable DDE-communication *
@@ -10,7 +15,14 @@ MODULE PowDDE;
  ********************************************************************************)
 
 
-IMPORT WD:=WinDef, WU:=WinUser, Strings, DDEML, SYSTEM, Float;
+IMPORT
+  WD := SBWin32 (*@KDS 2005-05-25 *),
+  WU := SBWin32 (*@KDS 2005-05-25 *),
+  Strings,
+  DDEML := SBWin32, (*@KDS 2005-05-25 *)
+  SYSTEM, Float;
+  
+CONST bufsize = 512;
 
 VAR
   instance        : LONGINT;
@@ -20,7 +32,7 @@ VAR
   topicStrHandle  : DDEML.HSZ;
   convContext     : DDEML.HCONV;
   str             : ARRAY 200 OF CHAR;
-  buffer          : ARRAY 512 OF CHAR; (* buffer to speed up the text-transfer *)
+  buffer          : ARRAY bufsize OF CHAR; (* buffer to speed up the text-transfer *) (*@ was 512 *)
   bufferLen       : LONGINT;
 
 PROCEDURE FlushBuffer();
@@ -28,7 +40,7 @@ VAR
   data : DDEML.HDDEDATA;
   res:WD.DWORD;
 BEGIN
-  data := DDEML.DdeClientTransaction(SYSTEM.ADR(buffer), bufferLen+1, convContext, 0, WU.CF_TEXT, DDEML.XTYP_EXECUTE, 0, res);
+  data := DDEML.DdeClientTransaction(SYSTEM.ADR(buffer), bufferLen+1, convContext, NIL, WU.CF_TEXT, DDEML.XTYP_EXECUTE, 0, res);
   buffer := 'AppendText ';
   bufferLen := Strings.Length(buffer);
 END FlushBuffer;
@@ -38,17 +50,17 @@ VAR
   data : DDEML.HDDEDATA;
   res:WD.DWORD;
 BEGIN
-  data := DDEML.DdeClientTransaction(SYSTEM.ADR(s), Strings.Length(s)+1, convContext, 0, WU.CF_TEXT, DDEML.XTYP_EXECUTE, 0, res);
+  data := DDEML.DdeClientTransaction(SYSTEM.ADR(s), Strings.Length(s)+1, convContext, NIL, WU.CF_TEXT, DDEML.XTYP_EXECUTE, 0, res);
 END SendStringToPow;
 
 PROCEDURE SendTextToPow(s: ARRAY OF CHAR);
-VAR data: DDEML.HDDEDATA;
+VAR (*data: DDEML.HDDEDATA; @kds not used*) 
     len : LONGINT;
-    i   : LONGINT;
-    str : ARRAY 200 OF CHAR;
+    (*i   : LONGINT; @kds not used*)
+    (*str : ARRAY 200 OF CHAR; @kds not used*)
 BEGIN
   len := Strings.Length(s);
-  IF bufferLen + len + 1 >= 512 THEN
+  IF bufferLen + len + 1 >= bufsize THEN
     FlushBuffer();
   END;
   Strings.Append(buffer, s);
@@ -81,6 +93,7 @@ BEGIN
   SendTextToPow(buf);
 END WriteHex;
 
+(* @kds not used
 PROCEDURE CopyString(VAR d:ARRAY OF CHAR; s:ARRAY OF CHAR);
 VAR i:INTEGER;
 BEGIN
@@ -91,6 +104,7 @@ BEGIN
     d[i] := s[i];
   END;
 END CopyString;
+*)
 
 PROCEDURE WriteStr*(s: ARRAY OF CHAR);
 BEGIN
@@ -132,7 +146,7 @@ PROCEDURE [_APICALL] CallBack*(type,fmt:WD.UINT;
                               hData:DDEML.HDDEDATA; 
                               dwData1, dwData2:WD.DWORD): DDEML.HDDEDATA;
 BEGIN
-
+  RETURN NIL (*@KDS 2005-05-25*)
 END CallBack;
 
 PROCEDURE CreatePowConnection*():BOOLEAN;
@@ -148,13 +162,13 @@ BEGIN
   topicStr   := 'Pow';
   serviceStrHandle:=DDEML.DdeCreateStringHandleA(instance, SYSTEM.ADR(serviceStr), 0);
   topicStrHandle  :=DDEML.DdeCreateStringHandleA(instance, SYSTEM.ADR(topicStr), 0);
-  convContext := DDEML.DdeConnect(instance, serviceStrHandle, topicStrHandle, NIL);  
-  RETURN convContext # 0;
+  convContext := DDEML.DdeConnect(instance, serviceStrHandle, topicStrHandle, 0);  
+  RETURN convContext # NIL;
 END CreatePowConnection;
 
 PROCEDURE DestroyPowConnection*();
 VAR
-  res : WD.BOOL;
+  res : BOOLEAN;
 BEGIN
   IF bufferLen > 0 THEN
     FlushBuffer();

@@ -1,17 +1,23 @@
+ (* Changes
+     @KDS 2005-05-25 : 'File' no longer used
+     
+ *)
 MODULE SymFile;
 
 (********************************************************************************
  * Autor   : Gerhard Kurka                                                      *
+ *           Koen Desaeger                                                   *
  * Project : Symbol file browser ( viewer ) for POW-Oberon-2 symbol-files       *
  ********************************************************************************
  * This is based on basicin and provides higher level read-access to the        *
  * symbolfile.                                                                  *
  ********************************************************************************)
 
-IMPORT BasicIn, File, Symbol;
+IMPORT BasicIn, (*File,@KDS 2005-05-25*)
+  Symbol;
 
 VAR
-  symFileHandle : File.Handle;
+  symFileHandle : LONGINT; (*File.Handle;@KDS 2005-05-25*)
   success*      : BOOLEAN;
   symFileOpen   : BOOLEAN; 
   sy*           : INTEGER; 

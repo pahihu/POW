@@ -1,7 +1,12 @@
+ (* Changes
+     @KDS 2005-05-25 : SYSTEM.LOWORD, HIWORD iso Utils.HiWord, LoWord
+     
+ *)
 MODULE Parse;
 
 (********************************************************************************
  * Autor   : Gerhard Kurka                                                      *
+ *           Koen Desaeger                                                   *
  * Project : Symbol file browser ( viewer ) for POW-Oberon-2 symbol-files       *
  ********************************************************************************
  * Parses the symbol-file by calling the proper SymElement methods. In addition *
@@ -10,16 +15,20 @@ MODULE Parse;
  * method.                                                                      *
  ********************************************************************************)
 
-IMPORT WD:=WinDef, WU:=WinUser, SYSTEM, Utils,
-       SymFile, Symbol, Display := PowDDE, MiscSym, SymElem, SymLists, Strings;
+IMPORT
+  (*@KDS 2005-05-25 not used; WD:=WinDef,*)
+  (*@KDS 2005-05-25 WU:=WinUser,*)
+  SYSTEM, (*Utils,*)(*@KDS 2005-05-25*) WU := SBWin32,
+  SymFile, Symbol, Display := PowDDE, MiscSym, SymElem, SymLists,
+  Strings;
 
-TYPE sp = ARRAY 20 OF CHAR;
+(*TYPE sp = ARRAY 20 OF CHAR; @kds not used*)
 
 VAR
   symbolChain : POINTER TO SymElem.SymElement;
   element     : POINTER TO SymElem.SymElement;
   help        : POINTER TO SymElem.SymElement;
-  c           : CHAR;
+  (* c           : CHAR; @kds not used*)
 
 PROCEDURE CopyString(VAR d:ARRAY OF CHAR; s:ARRAY OF CHAR);
 VAR i:INTEGER;
@@ -43,28 +52,28 @@ BEGIN
   IF SymFile.success THEN
     signature:=SymFile.ReadLongInt();
     IF SymFile.success & (signature=1A4D5953H) THEN
-       version:=SymFile.ReadLongInt();
+      version:=SymFile.ReadLongInt();
        MiscSym.version:=version;
-       IF SymFile.success & (Utils.HiWord(version)=0016H) THEN
-          IF Utils.LoWord(version)=0119H THEN
+       IF SymFile.success & (SYSTEM.HIWORD(version)=0016H) THEN (*@KDS 2005-05-25*)
+          IF SYSTEM.LOWORD(version)=0119H THEN(*@KDS 2005-05-25*)
              MiscSym.version32Bit:=FALSE;
              MiscSym.InitMiscSym();
              symbolChain:=NIL;
              RETURN TRUE;
-          ELSIF Utils.LoWord(version)<0119H THEN
+          ELSIF SYSTEM.LOWORD(version)<0119H THEN (*@KDS 2005-05-25*)
              ret := WU.MessageBoxA(0, SYSTEM.ADR('Symbol File format is from old compiler!'),
                                     SYSTEM.ADR('Browser File Error'), WU.MB_OK);
           ELSE
              ret := WU.MessageBoxA(0, SYSTEM.ADR('Symbol File format is newer than this browser!'),
                                     SYSTEM.ADR('Browser File Error'), WU.MB_OK);
           END;
-       ELSIF SymFile.success & (Utils.HiWord(version)=0032H) THEN
-          IF Utils.LoWord(version)=0200H THEN
+       ELSIF SymFile.success & (SYSTEM.HIWORD(version)=0032H) THEN (*@KDS 2005-05-25*)
+          IF SYSTEM.LOWORD(version)=0200H THEN (*@KDS 2005-05-25*)
              MiscSym.version32Bit:=TRUE;
              MiscSym.InitMiscSym();
              symbolChain:=NIL;
              RETURN TRUE;
-          ELSIF Utils.LoWord(version)<0200H THEN
+          ELSIF SYSTEM.LOWORD(version)<0200H THEN (*@KDS 2005-05-25*)
              ret := WU.MessageBoxA(0, SYSTEM.ADR('Symbol File format is from old compiler!'),
                                     SYSTEM.ADR('Browser File Error'), WU.MB_OK);
           ELSE
@@ -90,7 +99,7 @@ END InitParser;
 
 PROCEDURE PSymFile*();
 VAR
-  arrayTypeFlag : BOOLEAN;
+  (*arrayTypeFlag : BOOLEAN; @kds not used *)
 BEGIN
   IF SymFile.success THEN
     SymFile.NewSym();

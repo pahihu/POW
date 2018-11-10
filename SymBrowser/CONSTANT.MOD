@@ -1,7 +1,9 @@
+(* kds 2005-05-25: do not display export marker for constants *)
 MODULE Constant;
 
 (*****************************************************************************
  * Autor   : Gerhard Kurka                                                   *
+ *           Koen Desaeger                                                   *
  * Project : Symbol file browser ( viewer ) for POW-Oberon-2 symbol-files    *
  *****************************************************************************
  * PURPOSE:  Implements classes derived from SymElement to handle constants  *
@@ -295,7 +297,7 @@ END ReadSymInformation;
 
 PROCEDURE (self: PConstant) DisplaySymInformation*();
 BEGIN
-  Display.WriteStr('  ');Display.WriteStr(self.constName); Display.WriteStr(' *='); 
+  Display.WriteStr('  ');Display.WriteStr(self.constName); Display.WriteStr(' ='); (*@kds was: ' *='*)
   self.constValue.DisplayConstValue;
   Display.WriteLn;
 END DisplaySymInformation;

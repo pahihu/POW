@@ -1,14 +1,24 @@
+ (* Changes
+     @KDS 2005-05-25 : SYSTEM.LOWORD, HIWORD iso Utils.HiWord, LoWord
+                       PProcType.DisplaySymStructure: display [_APICALL] iso [WINDOWS]
+                       Added whitespace after ; & : in parameter lists
+                       only export marker(-) for ro vars
+ *)
+ 
 MODULE MiscSym;
 
 (********************************************************************************
  * Autor   : Gerhard Kurka                                                      *
+ *           Koen Desaeger                                                      *
  * Project : Symbol file browser ( viewer ) for POW-Oberon-2 symbol-files       *
  ********************************************************************************
  * This module provides specific classes derived from SymElement for individual *
  * handling of the different sym-types.                                         *
  ********************************************************************************)
 
-IMPORT SYSTEM,Utils,SymElem, BasicIn, SymFile, Display:=PowDDE, Symbol, Constant, Strings, SymLists;
+IMPORT SYSTEM,(*Utils,*) (*@KDS 2005-05-25 : SYSTEM.LOWORD, HIWORD iso Utils.HiWord, LoWord*)
+  SymElem, BasicIn, SymFile, Display:=PowDDE, Symbol, Constant,
+  Strings, SymLists;
 
 TYPE  PBasicType=    POINTER TO BasicType;              (* Abstract basicClass for TYPES *)
       BasicType =    RECORD (SymElem.SymElement)
@@ -17,14 +27,14 @@ TYPE  PBasicType=    POINTER TO BasicType;              (* Abstract basicClass f
                        modNo : INTEGER;
                        ownRef: INTEGER;
                      END;            
-
+                     
       PBasicProc=    POINTER TO BasicProc;
       BasicProc =    RECORD (SymElem.SymElement)
                         name    : ARRAY 40 OF CHAR;     (* name of procedure *)
                         parList : SymElem.PSymElement;  (* List of formal-parameters *)
                         ref1    : INTEGER;              (* Resulttype *)
                      END;
-
+                     
       PModAnchor=    POINTER TO ModAnchor;
       ModAnchor=     RECORD (SymElem.SymElement)  
                         key4      : LONGINT;
@@ -52,29 +62,29 @@ TYPE  PBasicType=    POINTER TO BasicType;              (* Abstract basicClass f
                         parameter : POINTER TO SymElem.SymElement;
                         procedure : POINTER TO SymElem.SymElement;
                       END;
-
+      
       PProcedure=     POINTER TO Procedure;
       Procedure =     RECORD (BasicProc)
                         procNo : LONGINT;
                       END;
-  
+      
       PTProcedure=    POINTER TO TProcedure;
       TProcedure =    RECORD (BasicProc)
                         recRef1  : INTEGER;          (* typeTable Index of the bounding type *)
                         methno1  : INTEGER;          (* methTable Index *)
                         procNo1  : INTEGER;   
                       END;
-
+      
       PWProcedure=    POINTER TO WProcedure;
       WProcedure =    RECORD (BasicProc)
                         procNo1 : LONGINT;
                       END;
- 
+                      
       PCDECLProcedure=POINTER TO CDECLProcedure;
       CDECLProcedure =RECORD (BasicProc)
                         procNo1 : LONGINT;
                       END;
- 
+                      
       PCProcedure=    POINTER TO CProcedure;
       CProcedure =    RECORD (BasicProc)
                         len1 : INTEGER;               (* obj. code length              *)
@@ -178,17 +188,17 @@ VAR
   type      : PType;
   variable  : PVariable;
   parameter : PParameter;
-  procedure : PProcedure;
-  tprocedure: PTProcedure;
-  cprocedure: PCProcedure;
-  wprocedure: PWProcedure;
-  cdeclprocedure: PCDECLProcedure;
-  procType  : PProcType;
+  (*procedure : PProcedure; @kds not used*)
+  (*tprocedure: PTProcedure; @kds not used*)
+  (*cprocedure: PCProcedure; @kds not used*)
+  (*wprocedure: PWProcedure; @kds not used*)
+  (*cdeclprocedure: PCDECLProcedure; @kds not used*)
+  (*procType  : PProcType; @kds not used*)
   paramList : PParameterList;
   array     : PArray;
   dynArray  : PDynArray;
   pointer   : PPointer;
-  record    : PRecord;
+  (*record    : PRecord; @kds not used*)
   fieldlist : PFieldList;
   hdPtrOffs : PHdPtrOffset;
   hdtProc   : PHdtProc;
@@ -305,11 +315,11 @@ BEGIN
   WHILE help # NIL DO
     help.DisplaySymInformation();
     help := help.next;
-    IF help # NIL THEN Display.WriteStr(';'); END;
+    IF help # NIL THEN Display.WriteStr('; '); END;   (*@kds whitespace*)
   END;
   Display.WriteStr(')');
   IF self.ref1 # Symbol.noTypSy THEN
-    Display.WriteStr(':');
+    Display.WriteStr(': ');                           (*kds whitespace*)
     typeTable[self.ref1].DisplaySymName;
   END;
   Display.WriteStr(';');
@@ -838,13 +848,17 @@ END PrepareSymElement;
 PROCEDURE (self: PProcType) DisplaySymStructure*();
 VAR
   help : SymElem.PSymElement;
-  str  : ARRAY 25 OF CHAR;
+  (*str  : ARRAY 25 OF CHAR; @kds not used*)
 BEGIN
   help := self.parList;
   IF sysTypeTable[self.ownRef] = 0 THEN
     Display.WriteStr('PROCEDURE (');
-  ELSE
-    Display.WriteStr('PROCEDURE [WINDOWS] (');
+  ELSE                               (*@KDS 2005-05-25 added check for 32Bit*)
+    IF version32Bit THEN
+       Display.WriteStr('PROCEDURE [_APICALL] ');
+    ELSE
+       Display.WriteStr('PROCEDURE [WINDOWS] ');
+    END;
   END;
   WHILE help # NIL DO
     help.DisplaySymInformation();
@@ -890,7 +904,7 @@ BEGIN
   IF self.kind = Symbol.rovarParSy THEN
      Display.WriteStr('-');
   END;
-  Display.WriteStr(':'); typeTable[self.ref1].DisplaySymName;
+  Display.WriteStr(': '); typeTable[self.ref1].DisplaySymName;             (*kds whitespace*)
 END DisplaySymInformation;
 
 (************************************** Variable ****************************************)
@@ -916,8 +930,9 @@ BEGIN
     Display.WriteStr('    ');  (* rfldSy *)
   END; 
   Display.WriteStr(self.name);
-  CASE self.varKind OF
-    Symbol.varSy, Symbol.fldSy: Display.WriteStr('*');
+  CASE self.varKind OF(*
+    Symbol.varSy, Symbol.fldSy: Display.WriteStr('*');         (*kds only export marker(-) for ro vars *)
+    *)
   ELSE 
     Display.WriteStr('-');
   END;
@@ -1020,9 +1035,11 @@ BEGIN
       Display.WriteLn();
 
       Display.WriteStr(' * Symbolfile format version : ');
-      Display.WriteHex(Utils.HiWord(version));
+      (*Display.WriteHex(Utils.HiWord(version));*)
+      Display.WriteHex(SYSTEM.HIWORD(version));
       Display.WriteStr('-');
-      Display.WriteHex(Utils.LoWord(version));
+      (*Display.WriteHex(Utils.LoWord(version));*)
+      Display.WriteHex(SYSTEM.LOWORD(version));
       Display.WriteStr('  *');
       Display.WriteLn();
       

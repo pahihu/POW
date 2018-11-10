@@ -1,0 +1,86 @@
+POW!
+Programmer's Open Workbench
+Copyright 1997 FIM; Johannes Kepler University Linz
+
+Refering:      BOOSTED
+               Basic Operative Oberon Source Text EDitor
+
+
+boosted32.zip contains the source files
+
+
+Update,
+  this update does not have affect any compiled programs ( *.exe )
+
+  Preparation
+    MAKE A COPY OF THE DIRECTORY POW!\Oberon-2\src\boosted AND STORE IT IN A SECURE PLACE!!
+  
+  Installation
+    Unpack boosted32.zip into the directory POW!\Oberon-2\src\boosted of your pow installation
+    Copy POW!\boosted32.dll to the directory POW!\Oberon-2\src\boosted of your pow installation
+
+    copy boosted32.dll to POW!\boosted32.ell
+    
+  Syntax Colouring
+    is configured in BoosrEd.ini, you find an example in BoostED32.zip
+
+
+Corrections and Enhancements
+
+  2005JUN06
+    ENHANCEMENT
+      an error concerning syntax colouring corrected
+
+  2005MAY11
+    ENHANCEMENT
+      entering an open bracket automatically sets a closing one,
+      only at the end of a line
+
+  2005FEB09
+    ENHANCEMENT
+      filehnd
+        LoadFile:      sets the language configuration
+      boosted32, envhnd, filehnd, globwin, options, textwin, winhnd
+        syntax colouring redesigned
+        
+  2004OCT17
+    ENHANCEMENT
+      filehnd
+         LoadFile:     a file with a line length of more than 2048 is loaded
+                       without crashing POW!
+                       but you cannot do anything with this file
+                       
+  2004AUG25
+    ENHANCEMENT
+      WinHnd.mod
+        mouse wheel support added
+        
+  2004MAY01
+    ENHANCEMENT
+      syntax.mod, TextWin.mod, ...
+        the editor holds the comment strings & the keywords for up to 100 languages locally
+        one can add new syntax data to boosted.ini (in the windows directory)
+        defining section starts with "SyntaxColouring01" the next will be "SyntaxColouring02"
+        and so on
+      
+  2003OCT24
+    ENHANCEMENT
+      syntax.mod, TextWin.mod, ...
+        Oberon-2 keywords are coloured in blue
+      
+  2002OCT10
+    ENHANCEMENT
+      syntax.mod
+        a comment is automatically added behind an END
+        Statements CASE, FOR, IF, LOOP, WHILE, WITH and MODULE, DEFINITION
+        (thanks to Luca for the last to statements)
+      
+  2001OCT03;   Call 02.005
+    ENHANCEMENT
+      filehnd.mod
+        automatic version incrementation; "V 1.23.50" is incremented while saving
+        the file, additionally, the date 2002MAY02 is updated
+      
+
+Regards, Klaus
+Schönberg, 2005JUN09

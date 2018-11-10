@@ -48,3 +48,5 @@ ChangeLog
         - removed the Windows 2000 files, now boosted32 and obrn32
           are linked without a base address
         - BoostEd.ini file added to the config files
+050624	- BoosteEd as of 2005/06/15
+		- SymBrowser32 included as of 2005/05/26, old Symbrowser removed
