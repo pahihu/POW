@@ -1,0 +1,114 @@
+#include <D:\win32pwb\Bin\winuser.h>
+
+MyIcon ICON Ra.ico
+
+Cursor02
+       CURSOR harrow.cur
+
+
+MainMenu MENU
+{
+  POPUP "&File"
+  {
+    MENUITEM "O&pen",                  102
+    MENUITEM "Close",                  103
+    MENUITEM SEPARATOR
+    MENUITEM "Start",                  111
+    MENUITEM "Attach",                 112
+    MENUITEM "Suspend",                113
+    MENUITEM "Resume",                 114
+    MENUITEM "Stop",                   115
+    MENUITEM SEPARATOR
+    MENUITEM "Print",                  121
+    MENUITEM "Printer Setup",          122 
+    MENUITEM SEPARATOR
+    MENUITEM "Exit",                   199
+  }
+  POPUP "&Edit"
+  {
+    MENUITEM "&Search",                201
+    MENUITEM "R&eplace",               202
+    MENUITEM "&Goto",                  203
+    MENUITEM "&Cut",                   204
+    MENUITEM "&Paste",                 205
+  }
+  POPUP "&View"
+  {
+    MENUITEM "HexData",                301
+    MENUITEM SEPARATOR
+    MENUITEM "Dump Data",              302
+    MENUITEM "Section Headers",        303
+    POPUP "Data Directories"
+    {
+      MENUITEM "Export",               330
+      MENUITEM "Import",               331
+      MENUITEM "Resource",             332
+      MENUITEM "Exception",            333
+      MENUITEM "Security",             334
+      MENUITEM "BaseRelocation",       335
+      MENUITEM "Debug",                336
+      MENUITEM "Copyright",            337
+      MENUITEM "Global Pointer",       338
+      MENUITEM "Thread Local Storage", 339
+      MENUITEM "Load Config",          310
+      MENUITEM "Bound Import",         311
+      MENUITEM "Import Address Table", 312
+    }
+    MENUITEM SEPARATOR
+    MENUITEM "Symbol Table"            305
+    MENUITEM "Line Numbers",           306
+    MENUITEM "Symbol Table (global)",  307
+  }
+  POPUP "&Window"
+  {
+    MENUITEM "Tile horizontal",        401
+    MENUITEM "Tile vertical",          402
+    MENUITEM "Cascade",                403
+    MENUITEM "Arrange icons",          404
+    MENUITEM "Close all",              405
+  }
+  POPUP "&Administration"
+  {
+    MENUITEM "Font",                   501
+    MENUITEM SEPARATOR
+    POPUP "&StatusBar"
+    {
+      MENUITEM "Zero",                 520
+      MENUITEM "First",                521
+      MENUITEM "Second",               522
+      MENUITEM "Third",                523
+      MENUITEM "Fourth",               524
+    }
+  }
+  POPUP "&Help"
+  {
+    MENUITEM "&Help",                 601
+    MENUITEM "&About",                602
+  }
+}
+
+AboutBox DIALOGEX 10, 10, 150, 75
+STYLE WS_CAPTION | WS_EX_DLGMODALFRAME
+CAPTION "About"
+{
+  CTEXT        "Oberon-2 Debugger; V 1.40", 
+                                       601, 15, 10, 120, 20
+  CTEXT        "Copyright Klaus Schultze", 
+                                       602, 15, 25, 120, 15
+  PUSHBUTTON   "OK",                   609, 60, 50,  30, 15
+}
+
+STRINGTABLE
+  {
+  1014                                "DBGEVNTCLOSEACK"
+  1015                                "DBGEVNTACTIVE"
+  1016                                "DBGEVNTCLOSE"
+  1017                                "DBGEVNTSUSPEND"
+  1018                                "DBGEVNTRESUME"
+  1019                                "DBGEVNTSETTHREAD"
+  1020                                "DBGEVNTINITACK"
+  1021                                "DBGEVNTSTOP"
+  1022                                "DBGEVNTSTART"
+  1023                                "DBGEVNTSETPROCESS"
+  }
+

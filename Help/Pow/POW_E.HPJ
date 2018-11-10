@@ -1,0 +1,27 @@
+[OPTIONS]
+INDEX=Pow_Hilfe_Index
+TITLE=Pow! Help
+COMPRESS=true
+WARNING=1  
+
+[FILES]
+pow_e.rtf 
+
+[BITMAPS]
+open.bmp
+save.bmp
+comp.bmp
+make.bmp
+run.bmp
+combo.bmp
+status.bmp
+drwop.bmp
+drwcl.bmp
+drwopgr.bmp
+drvhard.bmp
+drvdisk.bmp
+drvnet.bmp
+
+[MAP]
+#include <pow_e.h>
+

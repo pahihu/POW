@@ -1,0 +1,15 @@
+; This file is maintained by HCW. Do not modify this file directly.
+
+[OPTIONS]
+HCW=0
+COMPRESS=12 Hall Zeck
+LCID=0xc07 0x0 0x0 ;German (Austrian)
+REPORT=Yes
+TITLE=Read Me
+HLP=.\readme.hlp
+
+[FILES]
+.\ReadMe.rtf
+
+[MAP]
+#include <steps.h>

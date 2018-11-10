@@ -1,0 +1,5 @@
+MODULE User;
+TYPE
+  DATA*    = RECORD END;
+  DATAPTR* = POINTER TO DATA;
+END User.
