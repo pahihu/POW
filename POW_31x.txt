@@ -44,3 +44,7 @@ ChangeLog
         - PostInstall.bat fixed to copy the configuration files
 040824  - fixes for Pow from Klaus Schultze
 040903  - obrn32_w2k.dll and boosted32_w2k.ell are for Windows 2000
+050316  - BoostEd mouse wheel fixes
+        - removed the Windows 2000 files, now boosted32 and obrn32
+          are linked without a base address
+        - BoostEd.ini file added to the config files

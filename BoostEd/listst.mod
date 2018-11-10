@@ -107,42 +107,42 @@ BEGIN
     sCh:=0X;
     IF line.commentNesting<=0 THEN
       sInx:=0;
-      WHILE (Options.stringDelims[sInx]#0X) &
-            (Options.stringDelims[sInx]#txt[i]) DO
+      WHILE (Options.ActSyntaxColouring.StringDelims[sInx]#0X) &
+            (Options.ActSyntaxColouring.StringDelims[sInx]#txt[i]) DO
         INC(sInx);
       END;
-      IF Options.stringDelims[sInx]#0X THEN
-        sCh:=Options.stringDelims[sInx];
+      IF Options.ActSyntaxColouring.StringDelims[sInx]#0X THEN
+        sCh:=Options.ActSyntaxColouring.StringDelims[sInx];
         INC(i);
         WHILE (txt[i]#0X) & (txt[i]#sCh) DO INC(i) END;
         IF txt[i]=sCh THEN INC(i) END;
       END;
     END;
     IF sCh#0X THEN
-    ELSIF txt[i]=Options.commentStart[0] THEN
+    ELSIF txt[i]=Options.ActSyntaxColouring.CommentStart[0] THEN
       sInx:=1;
-      WHILE (Options.commentStart[sInx]#0X) &
-            (txt[i+sInx]=Options.commentStart[sInx]) DO
+      WHILE (Options.ActSyntaxColouring.CommentStart[sInx]#0X) &
+            (txt[i+sInx]=Options.ActSyntaxColouring.CommentStart[sInx]) DO
         INC(sInx);
       END;
-      IF Options.commentStart[sInx]=0X THEN
+      IF Options.ActSyntaxColouring.CommentStart[sInx]=0X THEN
         INC(i,sInx);
-        IF (line.commentNesting<=0) OR Options.commentsNested THEN 
+        IF (line.commentNesting<=0) OR Options.ActSyntaxColouring.CommentsNested THEN 
           INC(line.commentNesting);
         END;
         line.isCommented:=TRUE;
       ELSE
         INC(i);
       END;
-    ELSIF txt[i]=Options.commentEnd[0] THEN
+    ELSIF txt[i]=Options.ActSyntaxColouring.CommentEnd[0] THEN
       sInx:=1;
-      WHILE (Options.commentEnd[sInx]#0X) &
-            (txt[i+sInx]=Options.commentEnd[sInx]) DO
+      WHILE (Options.ActSyntaxColouring.CommentEnd[sInx]#0X) &
+            (txt[i+sInx]=Options.ActSyntaxColouring.CommentEnd[sInx]) DO
         INC(sInx);
       END;
-      IF Options.commentEnd[sInx]=0X THEN
+      IF Options.ActSyntaxColouring.CommentEnd[sInx]=0X THEN
         INC(i,sInx);
-        IF (line.commentNesting>=0) OR Options.commentsNested THEN 
+        IF (line.commentNesting>=0) OR Options.ActSyntaxColouring.CommentsNested THEN 
           DEC(line.commentNesting);
         END;
         line.isCommented:=TRUE;

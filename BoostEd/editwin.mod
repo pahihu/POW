@@ -1,5 +1,5 @@
 (******************************************************************************)
-(*  Module EditWin                                         V 1.00.20          *)
+(*  Module EditWin                                         V 2.00.23          *)
 (*                                                                            *)
 (*  This module contains the implementation of the EditWinT class.            *)
 (*  The EditWinT class extends the TextWin.WinDescT class with the            *)
@@ -15,29 +15,32 @@ MODULE EditWin;
 
 IMPORT
   SYSTEM,
-  WinUser, WD:=WinDef, WB:=WinBase,
-  TWin:=TextWin, List:=ListSt, Strings, Syntax, Options, GlobMem, GlobWin;
+  WinBase, WinDef, WinUser,
+  TextWin, ListSt, Strings, Syntax, Options, GlobMem, GlobWin;
 
 
 TYPE
-  EditWinT* = RECORD (TWin.WinDescT)             (* enthält Verweis Textfensterdaten *) 
+  EditWinT*    = RECORD (TextWin.WinDescT)                 (* enthält Verweis Textfensterdaten *) 
   END;
-  EditWin *= POINTER TO EditWinT; (* Zeiger auf EditWinT *)
+  EditWin*     =                       POINTER TO EditWinT;(* Zeiger auf EditWinT *)
   
 PROCEDURE^ (VAR win:EditWinT) CursGoto*(row, col:LONGINT);
 
-(*********************************************************************************************)
-  
-PROCEDURE AssocWinObj*(hWnd:WD.HWND):EditWin;
+
+(*****************************************************************************)
+PROCEDURE AssocWinObj*                (hWnd:               WinDef.HWND)
+                                      :EditWin;
 (* liefert einen Zeiger auf ein Fenster, welcher sich auf ein gegebenes *)
 (* MS Windows-Fenster bezieht                                      *)
 BEGIN
   RETURN SYSTEM.VAL(EditWin,WinUser.GetWindowLongA(hWnd,0));
 END AssocWinObj;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CutSelectionFromScreen*():BOOLEAN;
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CutSelectionFromScreen*
+                                      ()
+                                      :BOOLEAN;
 (* schneidet den selektierten Text vom Bildschirm aus                       *)
 (* Rückgabewert : TRUE (erfolgreich), FALSE (nichts ausgewählt oder Fehler) *)
 
@@ -45,8 +48,8 @@ VAR
   rowCounter,len   : LONGINT;
   nonDelLine       : LONGINT;  
   i,dist,Y,dmyi    : LONGINT;
-  reslt            : WD.LRESULT;
-  emptybuf,txt,buf : ARRAY List.MAXLENGTH+1 OF CHAR;
+  reslt            : WinDef.LRESULT;
+  emptybuf,txt,buf : ARRAY ListSt.MAXLENGTH+1 OF CHAR;
   dmyb             : BOOLEAN;
   retval           : BOOLEAN;  (* Rückgabewert *)
 
@@ -95,7 +98,7 @@ BEGIN
   rowCounter:=0;
   win.text.InvalidateMarkArea;
   win.changed:=TRUE;
-  reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),List.PEM_SHOWCHANGED,1,0);
+  reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),ListSt.PEM_SHOWCHANGED,1,0);
   win.col:=win.text.markStart.col;
   win.row:=win.text.markStart.row;
   IF win.text.markStart.row#win.text.markEnd.row THEN
@@ -112,32 +115,34 @@ BEGIN
   RETURN retval;
 END CutSelectionFromScreen;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) SelectionToGlobMem*(VAR globMem:WD.HGLOBAL):BOOLEAN;
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) SelectionToGlobMem*
+                                      (VAR globMem:        WinDef.HGLOBAL)
+                                      :BOOLEAN;
 (* globalen Speicher allokieren und selektierten Text dorthin kopieren     *)
 (* Rückgabewert : TRUE (erfolgreich), FALSE (nichts ausgewählt oder Fehler *)
 
 VAR
   len,lpGlob,dummy,size : LONGINT;
-  txt                   : ARRAY List.MAXLENGTH+1 OF CHAR;
+  txt                   : ARRAY ListSt.MAXLENGTH+1 OF CHAR;
 
 BEGIN
   globMem:=0;
   size:=win.text.GetMarkedTextSize(); (* Größe des selektierten Textes ermitteln *)
   IF size=0 THEN RETURN FALSE END;
-  size:=size+1+List.MAXLENGTH; (* +List.MAXLENGTH wegen Undo Operationen *)
+  size:=size+1+ListSt.MAXLENGTH; (* +ListSt.MAXLENGTH wegen Undo Operationen *)
   (* Speicher allozieren *)
-  globMem:=WB.GlobalAlloc(WB.GMEM_FIXED,size);
-  IF globMem=WD.NULL THEN (* Speicherplatzanforderung erfolgreich ? *)
+  globMem:=WinBase.GlobalAlloc(WinBase.GMEM_FIXED,size);
+  IF globMem=WinDef.NULL THEN (* Speicherplatzanforderung erfolgreich ? *)
     GlobWin.Beep;
     RETURN FALSE;
   END;
-  lpGlob:=WB.GlobalLock(globMem); (* globales Speicherobjekt sperren *)
-  ASSERT(lpGlob#WD.NULL);
+  lpGlob:=WinBase.GlobalLock(globMem); (* globales Speicherobjekt sperren *)
+  ASSERT(lpGlob#WinDef.NULL);
   IF ~win.text.GetFirstMarkedLine(txt) THEN
-    dummy:=WB.GlobalUnlock(globMem); (* Sperre aufheben *) 
-    globMem:=WB.GlobalFree(globMem); (* Speicherobjekt freigeben *)
+    dummy:=WinBase.GlobalUnlock(globMem); (* Sperre aufheben *) 
+    globMem:=WinBase.GlobalFree(globMem); (* Speicherobjekt freigeben *)
     RETURN FALSE;
   END;
   len:=Strings.Length(txt);
@@ -151,23 +156,25 @@ BEGIN
     INC(lpGlob,len);
   END;
   SYSTEM.PUT(lpGlob,0X);
-  dummy:=WB.GlobalUnlock(globMem);  
+  dummy:=WinBase.GlobalUnlock(globMem);  
   RETURN TRUE;
 END SelectionToGlobMem;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) FreeUndoBuffer*();
+(*********************************************************************************************)
+PROCEDURE (VAR win:EditWinT) FreeUndoBuffer*
+                                      ();
 (* Undo Buffer freigeben *)
 BEGIN
-  IF win.undoData#WD.NULL THEN
-    win.undoData:=WB.GlobalFree(win.undoData);
+  IF win.undoData#WinDef.NULL THEN
+    win.undoData:=WinBase.GlobalFree(win.undoData);
   END;
 END FreeUndoBuffer;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) SetUndoAction*(action:LONGINT);
+(*********************************************************************************************)
+PROCEDURE (VAR win:EditWinT) SetUndoAction*
+                                      (action:             LONGINT);
 (* Undo Action Code setzen, aktuelle Zeile und Spalte merken und alten Buffer freigeben *)
 
 BEGIN
@@ -181,15 +188,17 @@ BEGIN
   win.undoLen:=0;
 END SetUndoAction;
 
-(*********************************************************************************************)
 
+(*****************************************************************************)
 (* CURSOR - BEWEGUNGEN *)
 
-PROCEDURE (VAR win:EditWinT) CursMovePrepare(mark,down:BOOLEAN);
+PROCEDURE (VAR win:EditWinT) CursMovePrepare
+                                      (mark,
+                                       down:               BOOLEAN);
 (* Vorbereitung für Cursorbewegung *)
 VAR
   len,col : LONGINT;
-  done    : WD.BOOL;
+  done    : WinDef.BOOL;
 
 BEGIN
   IF win.text.lines=0 THEN RETURN END;
@@ -210,9 +219,10 @@ BEGIN
   END;
 END CursMovePrepare;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursMoveFinish;
+(*********************************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursMoveFinish
+                                      ();
 (* Cursorbewegung abschließen *)
 VAR
   col,len  : LONGINT;
@@ -235,26 +245,27 @@ BEGIN
   win.SetCaret;
   (* Nachricht senden *)
   dummy:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),
-                       List.PEM_SHOWLINER,
-                       SYSTEM.VAL(WD.WPARAM,win.col),
-                       SYSTEM.VAL(WD.LPARAM,win.row));
+                       ListSt.PEM_SHOWLINER,
+                       SYSTEM.VAL(WinDef.WPARAM,win.col),
+                       SYSTEM.VAL(WinDef.LPARAM,win.row));
 END CursMoveFinish;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursRight*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursRight*
+                                      (mark:               BOOLEAN);
 (* Cursor nach rechts *)
 BEGIN
   win.CursMovePrepare(mark,TRUE);
-  IF win.col<List.MAXLENGTH-1 THEN INC(win.col) ELSE 
+  IF win.col<ListSt.MAXLENGTH-1 THEN INC(win.col) ELSE 
     GlobWin.Beep;
   END;
   win.CursMoveFinish;
 END CursRight;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursLeft*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursLeft*(mark:               BOOLEAN);
 (* Cursor nach links *)
 BEGIN
   win.CursMovePrepare(mark,FALSE);
@@ -264,9 +275,9 @@ BEGIN
   win.CursMoveFinish;
 END CursLeft;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursUp*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursUp*  (mark:               BOOLEAN);
 (* Cursor nach oben *)
 BEGIN
   win.CursMovePrepare(mark,FALSE);
@@ -277,9 +288,9 @@ BEGIN
   win.CursMoveFinish;
 END CursUp;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursDown*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursDown*(mark:               BOOLEAN);
 (* Cursor nach unten *)
 BEGIN
   win.CursMovePrepare(mark,TRUE);
@@ -290,9 +301,9 @@ BEGIN
   win.CursMoveFinish;
 END CursDown;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursPgUp*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursPgUp*(mark:               BOOLEAN);
 (* Cursor Seite nach oben *)
 BEGIN
   win.CursMovePrepare(mark,FALSE);
@@ -304,9 +315,9 @@ BEGIN
   win.CursMoveFinish;
 END CursPgUp;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursPgDn*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursPgDn*(mark:               BOOLEAN);
 (* Cursor Seite nach unten *)
 BEGIN
   win.CursMovePrepare(mark,TRUE);
@@ -321,9 +332,9 @@ BEGIN
   win.CursMoveFinish;
 END CursPgDn;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursPos1*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursPos1*(mark:               BOOLEAN);
 (* Cursor an Beginn einer Zeile *)
 BEGIN
   win.CursMovePrepare(mark,FALSE);
@@ -331,9 +342,9 @@ BEGIN
   win.CursMoveFinish;
 END CursPos1;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursEnd*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursEnd* (mark:               BOOLEAN);
 (* Cursor an Ende einer Zeile *)
 VAR
   len : LONGINT;
@@ -344,9 +355,10 @@ BEGIN
   win.CursMoveFinish;
 END CursEnd;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursTextStart*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursTextStart*
+                                      (mark:               BOOLEAN);
 (* Cursor an Beginn des Textes *)
 BEGIN
   win.CursMovePrepare(mark,FALSE);
@@ -357,9 +369,10 @@ BEGIN
   win.CursMoveFinish;
 END CursTextStart;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursTextEnd*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursTextEnd*
+                                      (mark:               BOOLEAN);
 (* Cursor an Ende des Textes *)
 VAR
   len : LONGINT;
@@ -374,13 +387,14 @@ BEGIN
   win.CursMoveFinish;
 END CursTextEnd;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursIdentRight*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursIdentRight*
+                                      (mark:               BOOLEAN);
 (* Cursor an Ende eines Wortes *)
 VAR
   len,pos : LONGINT;
-  txt     : ARRAY List.MAXLENGTH OF CHAR;
+  txt     : ARRAY ListSt.MAXLENGTH OF CHAR;
 BEGIN
   IF ~win.text.GetLine(win.row,txt,len) THEN RETURN END;
   win.CursMovePrepare(mark,TRUE);
@@ -391,13 +405,14 @@ BEGIN
   win.CursMoveFinish;
 END CursIdentRight;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursIdentLeft*(mark:BOOLEAN);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursIdentLeft*
+                                      (mark:               BOOLEAN);
 (* Cursor an Beginn eines Wortes *)
 VAR
   len,pos : LONGINT;
-  txt     : ARRAY List.MAXLENGTH OF CHAR;
+  txt     : ARRAY ListSt.MAXLENGTH OF CHAR;
 BEGIN
   IF ~win.text.GetLine(win.row,txt,len) THEN RETURN END;
   win.CursMovePrepare(mark,FALSE);
@@ -409,9 +424,10 @@ BEGIN
   win.CursMoveFinish;
 END CursIdentLeft;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) CursGoto*(row, col:LONGINT);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) CursGoto*(row, 
+                                       col:                LONGINT);
 (* Cursor an eine bestimmte Stelle im Fenster setzen (Zeile / Spalte)        *)
 (* Zahlen beginnen mit 1, bei Zeile = -1 oder Spalte = -1 an Ende des Textes *)
 BEGIN
@@ -423,8 +439,8 @@ BEGIN
     ELSIF row<1 THEN 
       row  := 1 
     END;
-    IF col>List.MAXLENGTH-1 THEN 
-      col := List.MAXLENGTH-1
+    IF col>ListSt.MAXLENGTH-1 THEN 
+      col := ListSt.MAXLENGTH-1
     ELSIF col<1 THEN 
       col := 1 
     END;
@@ -435,18 +451,20 @@ BEGIN
   END;
 END CursGoto;
 
-(*********************************************************************************************)
 
+(*****************************************************************************)
 (* SONDERTASTEN *)
 
-PROCEDURE (VAR win:EditWinT) DeleteChar*():BOOLEAN;
+PROCEDURE (VAR win:EditWinT) DeleteChar*
+                                      ()
+                                      :BOOLEAN;
 (* Zeichen löschen *)
 VAR 
   i,len,dmyi     : LONGINT;
-  buf,buf2       : ARRAY List.MAXLENGTH OF CHAR;
+  buf,buf2       : ARRAY ListSt.MAXLENGTH OF CHAR;
   spacebuf       : ARRAY 3 OF CHAR;
   done,dmyb      : BOOLEAN;
-  reslt          : WD.LRESULT;
+  reslt          : WinDef.LRESULT;
   nestingChanged : BOOLEAN;
 
 BEGIN
@@ -456,12 +474,12 @@ BEGIN
     RETURN FALSE;
   END;
   IF win.text.isSelected THEN  (* irgendetwas selektiert ? *)
-    win.SetUndoAction(TWin.ACT_CUT);
+    win.SetUndoAction(TextWin.ACT_CUT);
     win.undoRow:=win.text.markStart.row;
     win.undoCol:=win.text.markStart.col;
     done:=win.SelectionToGlobMem(win.undoData);
     IF ~done THEN 
-      win.SetUndoAction(TWin.ACT_NONE);
+      win.SetUndoAction(TextWin.ACT_NONE);
       GlobWin.Beep;
     END;
     done:=win.CutSelectionFromScreen();
@@ -469,7 +487,7 @@ BEGIN
   END;
   IF ~win.text.GetLine(win.row, buf, len) THEN RETURN FALSE END;
   IF win.col>len THEN (* leere Zeile, Zeilen nachziehen *)
-    win.SetUndoAction(TWin.ACT_MERGELINE);
+    win.SetUndoAction(TextWin.ACT_MERGELINE);
     FOR i:=len TO win.col-2 DO buf[i]:=" " END;
     len:=win.col-1;
     buf[len]:=0X;
@@ -484,9 +502,9 @@ BEGIN
     done:=win.text.MergeLines(win.row);
     win.ShowTextRange(win.row,win.text.lines);
   ELSE                             
-    IF (win.undoAction#TWin.ACT_DELCHAR) OR ~win.undo OR
+    IF (win.undoAction#TextWin.ACT_DELCHAR) OR ~win.undo OR
        (win.undoRow#win.row) OR (win.undoCol#win.col) THEN 
-      win.SetUndoAction(TWin.ACT_DELCHAR);
+      win.SetUndoAction(TextWin.ACT_DELCHAR);
       GlobMem.NewLineBuf(win.undoData);
     END;
     INC(win.undoLen);
@@ -504,32 +522,33 @@ BEGIN
     END;
   END;
   (* Nachricht senden *)
-  reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),List.PEM_SHOWLINER,SYSTEM.VAL(WD.WPARAM,win.col),
-         SYSTEM.VAL(WD.LPARAM,win.row));
+  reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),ListSt.PEM_SHOWLINER,SYSTEM.VAL(WinDef.WPARAM,win.col),
+         SYSTEM.VAL(WinDef.LPARAM,win.row));
   win.changed:=TRUE;       
   RETURN done;
 END DeleteChar;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) Key_Back*():BOOLEAN;
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) Key_Back*()
+                                      :BOOLEAN;
 (* Backspace *)
 VAR 
   y,i,len,len2,dmyi  : LONGINT;
-  buf                : ARRAY List.MAXLENGTH OF CHAR;
+  buf                : ARRAY ListSt.MAXLENGTH OF CHAR;
   spacebuf           : ARRAY 3 OF CHAR;
   done,blanks,dmyb   : BOOLEAN;
-  reslt              : WD.LRESULT;
+  reslt              : WinDef.LRESULT;
   nestingChanged     : BOOLEAN;
 
 BEGIN
   IF win.text.isSelected THEN  (* irgendetwas selektiert ? *)
-    win.SetUndoAction(TWin.ACT_CUT);
+    win.SetUndoAction(TextWin.ACT_CUT);
     win.undoRow:=win.text.markStart.row;
     win.undoCol:=win.text.markStart.col;
     done:=win.SelectionToGlobMem(win.undoData);
     IF ~done THEN 
-      win.SetUndoAction(TWin.ACT_NONE);
+      win.SetUndoAction(TextWin.ACT_NONE);
       GlobWin.Beep;
     END;
     done:=win.CutSelectionFromScreen();
@@ -550,9 +569,9 @@ BEGIN
     DEC(win.col);
     win.SetCaret;
   ELSIF (win.col>1) & (win.col<=len+1) THEN (* zwischen 1 und len+1 *)
-    IF (win.undoAction#TWin.ACT_DELCHAR) OR ~win.undo OR
+    IF (win.undoAction#TextWin.ACT_DELCHAR) OR ~win.undo OR
        (win.undoRow#win.row) OR (win.undoCol#win.col) THEN 
-      win.SetUndoAction(TWin.ACT_DELCHAR);
+      win.SetUndoAction(TextWin.ACT_DELCHAR);
       GlobMem.NewLineBuf(win.undoData);
     END;
     GlobMem.InsertChar(win.undoData,buf[win.col-2]);  
@@ -574,7 +593,7 @@ BEGIN
     spacebuf:="  ";
     win.SetCaret;
   ELSIF (win.col=1) & (win.row>1) THEN (* Zeile nachziehen *)
-    win.SetUndoAction(TWin.ACT_MERGELINE);
+    win.SetUndoAction(TextWin.ACT_MERGELINE);
     IF Options.smartDel THEN
       blanks:=buf[0]=" ";
       Strings.RemoveLeadingSpaces(buf);
@@ -599,28 +618,29 @@ BEGIN
   END;  
   (* Nachricht senden *)
   reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),
-                       List.PEM_SHOWLINER,
-                       SYSTEM.VAL(WD.WPARAM,win.col),
-                       SYSTEM.VAL(WD.LPARAM,win.row));
+                       ListSt.PEM_SHOWLINER,
+                       SYSTEM.VAL(WinDef.WPARAM,win.col),
+                       SYSTEM.VAL(WinDef.LPARAM,win.row));
   RETURN TRUE;
 END Key_Back;
  
-(*********************************************************************************************)
- 
-PROCEDURE (VAR win:EditWinT) Key_Tab*():BOOLEAN;
+
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) Key_Tab* ()
+                                      :BOOLEAN;
 (* Tabulator gedrückt *)
 VAR 
   i,len,len2,dmyi   : LONGINT;
-  buf               : ARRAY List.MAXLENGTH OF CHAR;
+  buf               : ARRAY ListSt.MAXLENGTH OF CHAR;
   dmyb,update       : BOOLEAN;
-  reslt             : WD.LRESULT;    
+  reslt             : WinDef.LRESULT;    
   nestingChanged    : BOOLEAN;
 BEGIN
   nestingChanged:=FALSE;
-  win.SetUndoAction(TWin.ACT_NONE);
+  win.SetUndoAction(TextWin.ACT_NONE);
   IF Options.tabsize=0 THEN RETURN FALSE END;
   update:=win.text.GetLine( win.row, buf,len);
-  IF Options.tabsize+len>List.MAXLENGTH-1 THEN RETURN FALSE END;
+  IF Options.tabsize+len>ListSt.MAXLENGTH-1 THEN RETURN FALSE END;
   IF win.col<=len THEN  (* in Textbereich *)
     FOR i:=len TO win.col BY -1 DO
       buf[i+Options.tabsize-1]:=buf[i-1];
@@ -645,32 +665,33 @@ BEGIN
   END;
   win.SetCaret;
   (* Nachricht senden *)
-  reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),List.PEM_SHOWLINER,SYSTEM.VAL(WD.WPARAM,win.col),
-         SYSTEM.VAL(WD.LPARAM,win.row));
+  reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),ListSt.PEM_SHOWLINER,SYSTEM.VAL(WinDef.WPARAM,win.col),
+         SYSTEM.VAL(WinDef.LPARAM,win.row));
   RETURN TRUE;
 END Key_Tab;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) Key_Return*;
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) Key_Return*
+                                      ();
 (* Return Taste gedrückt *)
 VAR 
-  txt                   : ARRAY List.MAXLENGTH OF CHAR;
+  txt                   : ARRAY ListSt.MAXLENGTH OF CHAR;
   spaces,i,splitAt,len  : LONGINT;
   done,noNewLine        : BOOLEAN;
 
 BEGIN
   IF win.text.lines=0 THEN
-    win.SetUndoAction(TWin.ACT_NONE);
+    win.SetUndoAction(TextWin.ACT_NONE);
     txt:="";
     len:=0;
     done:=win.text.AddLine(txt);
   ELSE
-    win.SetUndoAction(TWin.ACT_SPLITLINE);
+    win.SetUndoAction(TextWin.ACT_SPLITLINE);
     done:=win.text.GetLine(win.row,txt,len);
   END;
   IF ~done THEN 
-    win.SetUndoAction(TWin.ACT_NONE); 
+    win.SetUndoAction(TextWin.ACT_NONE); 
     GlobWin.Beep;
     RETURN;
   END;
@@ -707,14 +728,14 @@ BEGIN
   END;
 END Key_Return; 
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) Key_Char*(ch:CHAR);
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) Key_Char*(ch:                 CHAR);
 (* Zeichen eingegeben *)
 VAR 
   done           : BOOLEAN;
   i,len          : LONGINT;
-  txt            : ARRAY List.MAXLENGTH OF CHAR;
+  txt            : ARRAY ListSt.MAXLENGTH OF CHAR;
   nestingChanged : BOOLEAN;
 
 BEGIN
@@ -731,21 +752,21 @@ BEGIN
   END;
   IF ~win.RowVisible(win.row) THEN win.CursGoto(win.row,win.col) END;
   IF Options.insert THEN      
-    IF (win.undoAction#TWin.ACT_INSERTCHAR) OR 
+    IF (win.undoAction#TextWin.ACT_INSERTCHAR) OR 
        (win.undoRow#win.row) OR (win.undoCol+win.undoLen#win.col) THEN
-      IF (win.undoAction=TWin.ACT_OVERWRITESELECTION) & 
+      IF (win.undoAction=TextWin.ACT_OVERWRITESELECTION) & 
          (win.undoRow=win.row) & (win.undoCol=win.col) THEN
-        win.undoAction:=TWin.ACT_INSERTCHAR;
+        win.undoAction:=TextWin.ACT_INSERTCHAR;
         win.undoLen:=0;
       ELSE
-        win.SetUndoAction(TWin.ACT_INSERTCHAR);
+        win.SetUndoAction(TextWin.ACT_INSERTCHAR);
         GlobMem.NewLineBuf(win.undoData);
       END;
     END;
   ELSE
-    IF (win.undoAction#TWin.ACT_OVERWRITECHAR) OR 
+    IF (win.undoAction#TextWin.ACT_OVERWRITECHAR) OR 
        (win.undoRow#win.row) OR (win.undoCol+win.undoLen#win.col) THEN
-      win.SetUndoAction(TWin.ACT_OVERWRITECHAR);
+      win.SetUndoAction(TextWin.ACT_OVERWRITECHAR);
       GlobMem.NewLineBuf(win.undoData);
     END;
   END;
@@ -758,7 +779,7 @@ BEGIN
     INC(win.undoLen);
     txt[win.col-1]:=ch;
     txt[len+1]:=0X;
-  ELSIF win.col<List.MAXLENGTH THEN
+  ELSIF win.col<ListSt.MAXLENGTH THEN
     IF ~Options.insert THEN GlobMem.CopyChar(win.undoData," ") END;
     INC(win.undoLen);
     FOR i:=len TO win.col-2 DO txt[i]:=" " END;
@@ -778,28 +799,29 @@ BEGIN
   win.CursRight(FALSE);
 END Key_Char;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) DeleteLine*;
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) DeleteLine*
+                                      ();
 (* Zeile löschen *)
 BEGIN
   win.DeleteLine^;
   IF win.row>win.text.lines THEN win.CursUp(FALSE) END;
 END DeleteLine;
 
-(*********************************************************************************************)
 
+(*****************************************************************************)
 (* UNDO / REDO FUNKTIONALITÄT *)
 
-PROCEDURE (VAR win:EditWinT) Undo*;
+PROCEDURE (VAR win:EditWinT) Undo*    ();
 (* letztes Kommando zurücknehmen *)
 VAR
-  txt,buf      : ARRAY List.MAXLENGTH+1 OF CHAR;
+  txt,buf      : ARRAY ListSt.MAXLENGTH+1 OF CHAR;
   len,i        : LONGINT;
   lpGlob       : LONGINT;
   ch           : CHAR;
   done         : BOOLEAN;
-  tmpBuf       : WD.HANDLE;
+  tmpBuf       : WinDef.HANDLE;
   
   PROCEDURE CursGotoUndo;
   BEGIN
@@ -813,14 +835,14 @@ VAR
   END CursGotoUndo;
 
 BEGIN
-  IF win.undoAction=TWin.ACT_NONE THEN 
+  IF win.undoAction=TextWin.ACT_NONE THEN 
     GlobWin.Beep;
     RETURN;
   END;
   IF win.undo THEN
     win.undo:=FALSE;
     CASE win.undoAction OF
-    | TWin.ACT_PASTE:
+    | TextWin.ACT_PASTE:
         win.text.SetMarkArea(win.undoRow,win.undoCol,win.undoToRow,win.undoToCol);
         done:=win.CutSelectionFromScreen();
         win.row:=win.undoRow;
@@ -828,7 +850,7 @@ BEGIN
         IF win.undoData#0 THEN done:=win.InsertGlobMem(win.undoData) END;
         win.ShowTextRange(1,win.text.lines);
     
-    | TWin.ACT_CUT,TWin.ACT_OVERWRITESELECTION:
+    | TextWin.ACT_CUT,TextWin.ACT_OVERWRITESELECTION:
         win.row:=win.undoRow;
         win.col:=win.undoCol;
         IF win.undoData#0 THEN 
@@ -839,18 +861,18 @@ BEGIN
         END;
         win.ShowTextRange(1,win.text.lines);
     
-    | TWin.ACT_DELCHAR:
+    | TextWin.ACT_DELCHAR:
         IF win.text.GetLine(win.undoRow,txt,len) THEN
           FOR i:=len+win.undoLen TO win.undoCol+win.undoLen-1 BY -1 DO 
             txt[i]:=txt[i-win.undoLen];
           END;
-          lpGlob:=WB.GlobalLock(win.undoData); (* Speicherbereich sperren *)
-          ASSERT(lpGlob#WD.NULL);
+          lpGlob:=WinBase.GlobalLock(win.undoData); (* Speicherbereich sperren *)
+          ASSERT(lpGlob#WinDef.NULL);
           FOR i:=win.undoCol-1 TO win.undoCol+win.undoLen-2 DO
             SYSTEM.GET(lpGlob,txt[i]);
             INC(lpGlob);
           END;
-          lpGlob:=WB.GlobalUnlock(win.undoData); (* Sperre aufheben *)
+          lpGlob:=WinBase.GlobalUnlock(win.undoData); (* Sperre aufheben *)
           IF win.text.SetLine(win.undoRow, txt) THEN 
             CursGotoUndo;
             win.ShowTextLine(win.undoRow);
@@ -859,11 +881,11 @@ BEGIN
           END;
         END;
     
-    | TWin.ACT_MERGELINE:
+    | TextWin.ACT_MERGELINE:
         CursGotoUndo;
         GlobWin.Beep;
 
-    | TWin.ACT_SPLITLINE:
+    | TextWin.ACT_SPLITLINE:
         CursGotoUndo;
         IF win.text.GetLine(win.row+1,buf,len) THEN
           i:=0;
@@ -874,7 +896,7 @@ BEGIN
         done:=win.text.MergeLines(win.row); 
         win.ShowTextRange(win.row,win.text.lines);
         
-    | TWin.ACT_DELLINE:
+    | TextWin.ACT_DELLINE:
         win.row:=win.undoRow;
         win.col:=1;
         IF ~win.InsertGlobMem(win.undoData) THEN 
@@ -882,7 +904,7 @@ BEGIN
         END;
         CursGotoUndo;
         
-    | TWin.ACT_INSERTCHAR:    (* undoLen contains number of inserted characters *)
+    | TextWin.ACT_INSERTCHAR:    (* undoLen contains number of inserted characters *)
         IF win.text.GetLine(win.undoRow,txt,len) THEN
           GlobMem.NewLineBuf(tmpBuf);
           FOR i:=win.undoCol-1 TO win.undoCol+win.undoLen-2 DO GlobMem.CopyChar(tmpBuf,txt[i]) END;
@@ -910,17 +932,17 @@ BEGIN
           GlobWin.Beep;
         END;
         
-    | TWin.ACT_OVERWRITECHAR: (* undoLen enthält Anzahl der überschriebenen Zeichen *)
+    | TextWin.ACT_OVERWRITECHAR: (* undoLen enthält Anzahl der überschriebenen Zeichen *)
         IF win.text.GetLine(win.undoRow,txt,len) THEN
-          lpGlob:=WB.GlobalLock(win.undoData); (* Speicherbereich sperren *)
-          ASSERT(lpGlob#WD.NULL);
+          lpGlob:=WinBase.GlobalLock(win.undoData); (* Speicherbereich sperren *)
+          ASSERT(lpGlob#WinDef.NULL);
           FOR i:=win.undoCol-1 TO win.undoCol+win.undoLen-2 DO 
             ch:=txt[i];
             SYSTEM.GET(lpGlob,txt[i]);
             SYSTEM.PUT(lpGlob,ch);
             INC(lpGlob);
           END;
-          lpGlob:=WB.GlobalUnlock(win.undoData); (* Sperren aufheben *)
+          lpGlob:=WinBase.GlobalUnlock(win.undoData); (* Sperren aufheben *)
           IF win.text.SetLine(win.undoRow, txt) THEN 
             CursGotoUndo;
             win.ShowTextLine(win.undoRow);
@@ -940,31 +962,31 @@ BEGIN
   
 END Undo;
 
-(*********************************************************************************************)
 
-PROCEDURE (VAR win:EditWinT) Redo*;
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) Redo*    ();
 (* Kommando wiederholen *)
 BEGIN
   IF ~win.undo THEN
     win.undo:=TRUE;
     CASE win.undoAction OF
-    | TWin.ACT_PASTE:
+    | TextWin.ACT_PASTE:
         GlobWin.Beep;
         win.undo:=FALSE;
         
-    | TWin.ACT_DELCHAR:
+    | TextWin.ACT_DELCHAR:
         GlobWin.Beep;
         win.undo:=FALSE;
         
-    | TWin.ACT_MERGELINE:
+    | TextWin.ACT_MERGELINE:
         GlobWin.Beep;
         win.undo:=FALSE;
         
-    | TWin.ACT_SPLITLINE:
+    | TextWin.ACT_SPLITLINE:
         GlobWin.Beep;
         win.undo:=FALSE;
         
-    | TWin.ACT_DELLINE:
+    | TextWin.ACT_DELLINE:
         win.row:=win.undoRow;
         win.col:=win.undoCol;
         IF ~win.RowVisible(win.row) THEN 
@@ -974,11 +996,11 @@ BEGIN
         END;
         win.DeleteLine;
 
-    | TWin.ACT_INSERTCHAR:    (* undoLen contains number of inserted characters *)
+    | TextWin.ACT_INSERTCHAR:    (* undoLen contains number of inserted characters *)
         GlobWin.Beep;
         win.undo:=FALSE;
         
-    | TWin.ACT_OVERWRITECHAR:
+    | TextWin.ACT_OVERWRITECHAR:
         win.undo:=TRUE;
         win.Undo;
     ELSE
@@ -989,19 +1011,25 @@ BEGIN
   END;
 END Redo;
 
-PROCEDURE (VAR win:EditWinT) SearchText*(text:WD.LPSTR; 
-                                         matchcase, down, words:BOOLEAN):BOOLEAN;
+
+(*****************************************************************************)
+PROCEDURE (VAR win:EditWinT) SearchText*
+                                      (text:               WinDef.LPSTR; 
+                                       matchcase, 
+                                       down, 
+                                       words:              BOOLEAN)
+                                      :BOOLEAN;
 (* sucht einen Text mit einer optimierten Version von BOYER - MOORE       *)
 (* die nur N/M Zeichen vergleichen muß (M ... Länge des gesuchten String, *)
 (* N .... Länge des gesamten Texts                                        *)
                                                 
 VAR 
-  seektxt                   : ARRAY List.MAXLENGTH OF CHAR; 
-  buf                       : ARRAY List.MAXLENGTH OF CHAR;
+  seektxt                   : ARRAY ListSt.MAXLENGTH OF CHAR; 
+  buf                       : ARRAY ListSt.MAXLENGTH OF CHAR;
   m,dmyi,len,i,j,t,deltax   : LONGINT;
   skip                      : ARRAY 256 OF LONGINT;
   ok,doExit, break, dmyb    : BOOLEAN;
-  dmy                       : WD.LPSTR;
+  dmy                       : WinDef.LPSTR;
   startrow                  : LONGINT;
   res                       : BOOLEAN;
     
@@ -1031,8 +1059,8 @@ VAR
 BEGIN
   startrow:=win.row;
   
-  dmy:=WB.lstrcpyA(SYSTEM.ADR(seektxt),text); (* String in andere Adresse kopieren *)
-  ASSERT(dmy#WD.NULL); 
+  dmy:=WinBase.lstrcpyA(SYSTEM.ADR(seektxt),text); (* String in andere Adresse kopieren *)
+  ASSERT(dmy#WinDef.NULL); 
   
   m:=Strings.Length(seektxt);
   
@@ -1111,6 +1139,10 @@ BEGIN
   RETURN FALSE;
 END SearchText;
 
+(*****************************************************************************)
+(*****************************************************************************)
+BEGIN
+  ;
 END EditWin.
 
                       

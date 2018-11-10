@@ -1,20 +1,42 @@
 (*****************************************************************************)
-(*  Module WinHnd                                                            *)
 (*                                                                           *)
-(*  This module implements the Windows window class which is used            *)
-(*  for editor windows. This includes registration and deletion of           *)
-(*  the window class and the call-back procedure to receive Windows          *)
-(*  messages.                                                                *)
+(* PROJECT:    BoostEd32                                                     *)
+(*             Basic Operative Oberon Source Text EDitor                     *)
+(*                                                                           *)
+(* MODULE:     WinHnd                                      V 2.00.86         *)
+(*                                                         2005JAN17         *)
+(*  PURPOSE:   This module implements the Windows window class which is used *)
+(*             for editor windows.                                           *)
+(*             This includes registration and deletion of                    *)
+(*             the window class and the call-back procedure to receive       *)
+(*             Windows messages.                                             *)
+(*                                                                           *)
+(*  FUNCTIONS:                                                               *)
+(*   .         .                                                             *)
+(*                                                                           *)
+(*  COMMENTS:                                                                *)
+(*                                                                           *)
+(*                                                                           *)
+(* COPYRIGHT:                                                                *)
+(*                                                                           *)  
+(*                                                                           *)
+(* CONFIGURATION MANAGEMENT                                                  *)
+(*                                                                           *)
+(*  CREATED    1995                                                          *)
+(*                                                                           *)
+(*  UPDATED                                                                  *)
+(*   2004AUG25 KlS mouse wheel support added                                 *)
+(*                                                                           *)
 (*****************************************************************************)
 
 MODULE WinHnd;
 
 
 IMPORT
-  SYSTEM,
-  WinBase, WinUser, WinDef, WinGDI,
+  EditWin, GlobWin, ListSt, Options, Syntax, TextWin,
   Strings, 
-  ListSt, EditWin, Syntax, TextWin, GlobWin, Options;
+  WinBase, WinDef, WinGDI, WinUser,
+  SYSTEM;
 
 
 CONST 
@@ -27,39 +49,40 @@ VAR
   hFont*:                              WinDef.HFONT; 
   hcrIBeam,
   hcrArrow,
-  hcrWait:                             WinDef.HCURSOR;         (* verschiedene Cursortypen *)
+  hcrWait:                             WinDef.HCURSOR;     (* verschiedene Cursortypen *)
   langHelpFile*:                       ARRAY 150 OF CHAR;
-  wCounter-:                           INTEGER; (* Anzahl der offenen Fenster *)
+  wCounter-:                           INTEGER;            (* number of opened windows *)
   wList-:                              ARRAY MAXWIN OF EditWin.EditWin;
 
   
-
 (*****************************************************************************)
-
-PROCEDURE CtrlPressed*():BOOLEAN;
+PROCEDURE CtrlPressed*                ()
+                                      :BOOLEAN;
 BEGIN
   RETURN WinUser.GetKeyState(WinUser.VK_CONTROL)<0;
 END CtrlPressed;
 
 
-(***********************************************************************************************)   
-PROCEDURE ShiftPressed*():BOOLEAN;
+(*****************************************************************************)
+PROCEDURE ShiftPressed*               ()
+                                      :BOOLEAN;
 BEGIN
   RETURN WinUser.GetKeyState(WinUser.VK_SHIFT)<0;
 END ShiftPressed;
 
 
-(**********************************************************************************************)
-PROCEDURE SetWindowOldFont*(wndInx:LONGINT; font:WinDef.HFONT);
+(*****************************************************************************)
+PROCEDURE SetWindowOldFont*           (wndInx:             LONGINT;
+                                       font:               WinDef.HFONT);
 BEGIN
   wList[wndInx].oldFont:=font;
 END SetWindowOldFont;
 
 
-(**********************************************************************************************)
+(*****************************************************************************)
+(* legt ein neues Fenster zur Texteingabe an                                 *)
 PROCEDURE NewEditWindow*(parent : WinDef.HWND; 
                          readOnly : BOOLEAN);
-(* legt ein neues Fenster zur Texteingabe an *)
 
 VAR
   rect     : WinDef.RECT;
@@ -88,8 +111,10 @@ BEGIN
 END NewEditWindow;
 
 
-(*****************************************************************************)
-PROCEDURE AddText*(win:TextWin.WinDesc; text:WinDef.LPSTR):INTEGER;
+(**********************************************************************************************)
+PROCEDURE AddText*                    (win:                TextWin.WinDesc;
+                                       text:               WinDef.LPSTR)
+                                      :INTEGER;
 (* hängt einen Text an den bestehenden Text an *)
 (* Rückgabewert : 1 (erfolgreich), 0 (Fehler)  *)
 
@@ -110,8 +135,7 @@ BEGIN
   IF done THEN RETURN 1 ELSE RETURN 0 END;
 END AddText;
 
-(*****************************************************************************)
-
+(**********************************************************************************************)
 PROCEDURE Copy*(hEdit:WinDef.HWND):INTEGER;
 (* Kopiert den ausgewählten Text in die Zwischenablage              *)
 (* Rückgabewert : 1 (erfolgreich), 0 (nichts ausgewählt oder Fehler *)
@@ -141,8 +165,8 @@ BEGIN
   END;
 END Copy;
 
-(*****************************************************************************)
 
+(**********************************************************************************************)
 PROCEDURE Paste*(hEdit:WinDef.HWND):INTEGER;
 (* Fügt den Inhalt der Zwischenablage an der aktuellen Cursorposition ein *)
 (* Rückgabewert : 1 (erfolgreich), 0 (kein Text in der Zwischenablage)    *)
@@ -193,8 +217,8 @@ BEGIN
   RETURN 1; 
 END Paste;
 
-(*****************************************************************************)
 
+(**********************************************************************************************)
 PROCEDURE Cut*(hEdit:WinDef.HWND):INTEGER;
 (* schneidet den ausgewählten Text aus und überträgt ihn in die Zwischenablage *)
 (* Rückgabewert : 1 (erfolgreich), 0 (nichts ausgewählt oder Fehler            *)
@@ -257,7 +281,6 @@ BEGIN
 END MousePos2RowCol;
 
 (***********************************************************************************************)   
-
 PROCEDURE CreateCaret(win:TextWin.WinDesc);
 (* Caret erzeugen *)
 VAR
@@ -274,8 +297,8 @@ BEGIN
   win.SetCaret;
 END CreateCaret;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE DestroyCaret(win:TextWin.WinDesc);
 (* Caret löschen *)
 VAR 
@@ -289,8 +312,8 @@ BEGIN
   done := WinUser.DestroyCaret(); 
 END DestroyCaret;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE SelectWord(win:TextWin.WinDesc);
 (* Wort selektieren *)
 VAR
@@ -319,8 +342,8 @@ BEGIN
   win.col:=pos+1;
 END SelectWord;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE SelectByMouse(win:TextWin.WinDesc);
 (* Selektieren mit Maus *)
 
@@ -346,8 +369,8 @@ BEGIN
   win.CheckHorzScrollPos;
 END SelectByMouse;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE MsgRightButtonDown(win:TextWin.WinDesc; x,y:LONGINT);
 (* Nachrichtenbehandlung für rechte Maustaste gedrückt *)
 
@@ -373,8 +396,8 @@ BEGIN
                    SYSTEM.ADR(ident));
 END MsgRightButtonDown;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE MsgLeftButtonDown(win:TextWin.WinDesc; x,y:LONGINT);
 (* Nachrichtenbehandlung für linke Maustaste gedrückt *)
 
@@ -409,8 +432,8 @@ BEGIN
   (*res:=WinUser.SetTimer(win.hwnd,SELECTTIMER,125,WinDef.NULL);*)
 END MsgLeftButtonDown;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE MsgMouseMove(win:TextWin.WinDesc; x,y:LONGINT);
 (* Nachrichtenbehandlung für Mausbewegung *)
 
@@ -427,8 +450,8 @@ BEGIN
   END;
 END MsgMouseMove;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE MsgLeftDoubleClick(win:TextWin.WinDesc; x,y:LONGINT);
 (* Nachrichtenbehandlung für linken Maustastendoppelklick *)
 
@@ -439,8 +462,8 @@ BEGIN
   SelectWord(win);
 END MsgLeftDoubleClick;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE MsgLeftButtonUp(win:TextWin.WinDesc; x,y:LONGINT);
 (* Nachrichtenbehandlung für linke Maustaste losgelassen *)
 
@@ -474,8 +497,8 @@ BEGIN
                      SYSTEM.VAL(WinDef.LPARAM,win.row)); 
 END MsgLeftButtonUp;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE MsgSelectTimer(win:TextWin.WinDesc);
 (* Nachrichtenbehandlung für Timer *)
 
@@ -485,9 +508,10 @@ BEGIN
      (win.mouseY>=win.wndheight) THEN SelectByMouse(win) END;
 END MsgSelectTimer;
 
-(***********************************************************************************************)   
 
-PROCEDURE MsgCreate(hwnd:WinDef.HWND):INTEGER;
+(***********************************************************************************************)   
+PROCEDURE MsgCreate                   (hwnd:               WinDef.HWND)
+                                      :INTEGER;
 (* Nachrichtenbehandlung für WM_CREATE Nachricht *)
 
 VAR
@@ -554,8 +578,8 @@ BEGIN
   RETURN 0;
 END MsgCreate;
 
-(***********************************************************************************************)   
 
+(***********************************************************************************************)   
 PROCEDURE MsgDestroy(win:TextWin.WinDesc);
 (* Nachrichtenbehandlung von WM_DESTROY Nachricht *)
 
@@ -584,85 +608,87 @@ BEGIN
   DISPOSE(win);     (* delete global record *)
 END MsgDestroy;
 
-(****************************************************************)
 
+(****************************************************************)
 (****************************************************************)
 (*       CallBack-Funktion zur Nachrichtenbehandlung            *)
 (****************************************************************)
-
-PROCEDURE [_APICALL] BoostedWndProc*(hWnd:WinDef.HWND;
-                                   message: WinDef.UINT;
-                                   wParam:WinDef.WPARAM;
-                                   lParam:WinDef.LPARAM): WinDef.LRESULT;
+PROCEDURE [_APICALL] BoostedWndProc*  (hWnd:               WinDef.HWND;
+                                       message:            WinDef.UINT;
+                                       wParam:             WinDef.WPARAM;
+                                       lParam:             WinDef.LPARAM)
+                                      :WinDef.LRESULT;
 
 VAR
-  win         : EditWin.EditWin;
-  hdc         : WinDef.HDC;   (* Handle für Device Kontext für Begin/Endpaint *)
-  ps          : WinUser.PAINTSTRUCT;
-  tmpcur      : WinDef.HCURSOR;
-  reslt       : WinDef.LRESULT;
-  dmyb,done   : BOOLEAN;
-  dmyhwnd     : WinDef.HWND;
-  code        : WinDef.WORD; (* Code aus wParam *)
-  ok          : WinDef.BOOL;
-  rect        : WinDef.RECT;
-  exp         : LONGINT;
+  win:                                 EditWin.EditWin;
+  hdc:                                 WinDef.HDC;         (* Handle für Device Kontext für Begin/Endpaint *)
+  ps:                                  WinUser.PAINTSTRUCT;
+  tmpcur:                              WinDef.HCURSOR;
+  Result:                              WinDef.LRESULT;
+  dmyb,
+  done:                                BOOLEAN;
+  dmyhwnd:                             WinDef.HWND;
+  code:                                WinDef.WORD; (* Code aus wParam *)
+  ok:                                  WinDef.BOOL;
+  rect:                                WinDef.RECT;
+  Ready:                               BOOLEAN;
+  exp:                                 LONGINT;
+  i:                                   LONGINT;
+  MySyntaxColouring:                   Options.SyntaxColouringP;
 
 BEGIN
-  win:=EditWin.AssocWinObj(hWnd);
+  win          := EditWin.AssocWinObj(hWnd);
 
-  IF win=NIL THEN (* Fenster noch nicht vorhanden *)
+  IF win=NIL THEN                                          (* Fenster noch nicht vorhanden *)
 
-    IF message=WinUser.WM_CREATE THEN (* Neues Fenster anlegen *)
+    IF message=WinUser.WM_CREATE THEN                      (* Neues Fenster anlegen *)
       RETURN MsgCreate(hWnd);
     ELSE
       RETURN WinUser.DefWindowProcA(hWnd, message, wParam, lParam)
     END;
 
-  ELSE (* Fenster bereits vorhanden *)
+  ELSE                                                     (* Fenster bereits vorhanden *)
 
     ASSERT(win IS EditWin.EditWin);
-
   
     (****** WM_PAINT *******)
     IF message=WinUser.WM_PAINT THEN (* WM_PAINT *)
-
       hdc:=WinUser.BeginPaint(hWnd, ps);
-      win.ShowTextRange(1,win.text.lines);
+      win.ShowTextRange(1, win.text.lines);
       ok := WinUser.EndPaint(hWnd, ps);
       
     (****** WM_ERASEBKGND *******)
     ELSIF message=WinUser.WM_ERASEBKGND THEN 
-
       RETURN 1;
 
     (****** WM_DESTROY *******)
     ELSIF message=WinUser.WM_DESTROY THEN
-
       MsgDestroy(win);
       RETURN WinUser.DefWindowProcA(hWnd, message, wParam, lParam)
 
     (****** WM_VSCROLL *******)
     ELSIF message=WinUser.WM_VSCROLL THEN 
-
-  
       CASE SYSTEM.LOWORD(wParam) OF
         WinUser.SB_PAGEDOWN:
           win.VerScroll(win.lineNo);
-      | WinUser.SB_PAGEUP:
+        | 
+        WinUser.SB_PAGEUP:
           win.VerScroll(-win.lineNo);
-      | WinUser.SB_LINEDOWN:
+        | 
+        WinUser.SB_LINEDOWN:
           win.VerScroll(1);
-      | WinUser.SB_LINEUP:
+        | 
+        WinUser.SB_LINEUP:
           win.VerScroll(-1);
-      | WinUser.SB_THUMBPOSITION,WinUser.SB_THUMBTRACK: 
+        | 
+        WinUser.SB_THUMBPOSITION, WinUser.SB_THUMBTRACK: 
           win.VerScrollThumb(SYSTEM.HIWORD(wParam)+1);
-      ELSE
+        ELSE
+          ;
       END;
    
     (****** WM_HSCROLL *******)
     ELSIF message=WinUser.WM_HSCROLL THEN
-
       CASE SYSTEM.LOWORD(wParam) OF
         WinUser.SB_PAGEDOWN:
           win.HorScroll(win.colNo);
@@ -677,10 +703,17 @@ BEGIN
       ELSE
       END;
 
+    (****** WM_MOUSEWHEEL ******                             KlS, 2004AUG25 *)
+    ELSIF message=020AH THEN
+      IF SYSTEM.HIWORD(wParam)>0 THEN
+        win.VerScroll(-1);
+      ELSE
+        win.VerScroll(1);
+      END (* IF SYSTEM.HIWORD(wParam)>0 *);
+
     (****** WM_SETCURSOR *******)
     ELSIF message=WinUser.WM_SETCURSOR THEN
-
-      IF wParam = WinUser.HTCLIENT THEN (* Cursor in Clientbereich ändern *)
+      IF wParam = WinUser.HTCLIENT THEN                    (* Cursor in Clientbereich ändern *)
         exp := WinUser.MessageBoxA(hWnd, SYSTEM.ADR("Cursor"), SYSTEM.ADR("!!!"), WinUser.MB_OK); 
         tmpcur:=WinUser.SetCursor(hcrIBeam)
       ELSE 
@@ -689,8 +722,7 @@ BEGIN
    
     (****** WM_KEYDOWN *******)
     ELSIF message=WinUser.WM_KEYDOWN THEN
-
-      CASE wParam OF (* virtuellen Tastencode auslesen *)
+      CASE wParam OF                                       (* virtuellen Tastencode auslesen *)
         WinUser.VK_LEFT: 
           IF CtrlPressed() THEN 
             win.CursIdentLeft(ShiftPressed());
@@ -721,8 +753,8 @@ BEGIN
           END;
       | WinUser.VK_DELETE: 
           IF win.readOnly THEN RETURN WinUser.DefWindowProcA(hWnd,message,wParam,lParam) END;
-          reslt:=WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWCHANGED,1,0);
-          dmyb:=win.DeleteChar();
+          Result := WinUser.SendMessageA(WinUser.GetParent(hWnd), ListSt.PEM_SHOWCHANGED, 1, 0);
+          dmyb   := win.DeleteChar();
           IF ~dmyb THEN RETURN 0 END;
       | WinUser.VK_INSERT:                
           IF win.readOnly THEN RETURN WinUser.DefWindowProcA(hWnd,message,wParam,lParam) END;
@@ -730,9 +762,9 @@ BEGIN
           DestroyCaret(win);         
           CreateCaret(win);
           IF Options.insert THEN 
-            reslt:=WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWINSERTMODE,1,0); 
+            Result := WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWINSERTMODE,1,0); 
           ELSE 
-            reslt:=WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWINSERTMODE,0,0);
+            Result := WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWINSERTMODE,0,0);
           END;      
       | WinUser.VK_PRIOR : 
           IF CtrlPressed() THEN
@@ -759,24 +791,39 @@ BEGIN
                      
     (****** WM_ACTIVATE *******)
     ELSIF message=WinUser.WM_ACTIVATE THEN
-
-      code := SYSTEM.LOWORD(wParam);
-      IF (code = WinUser.WA_ACTIVE) OR (code = WinUser.WA_CLICKACTIVE) THEN
-        dmyhwnd:=WinUser.SetFocus(win.hwnd);  
+      code     := SYSTEM.LOWORD(wParam);
+      IF (code=WinUser.WA_ACTIVE) OR (code=WinUser.WA_CLICKACTIVE) THEN
+        dmyhwnd  := WinUser.SetFocus(win.hwnd);  
         GlobWin.Beep;
+      ELSE
+        ;
       END;
       RETURN WinUser.DefWindowProcA(hWnd,message,wParam,lParam);
     
     (****** WM_SETFOCUS *******)
     ELSIF message=WinUser.WM_SETFOCUS THEN
+      Options.ActSyntaxColouring := Options.AnchorSyntaxColouring;
+      MySyntaxColouring          := Options.AnchorSyntaxColouring;
+      IF Strings.Length(win.Extension)=0 THEN
+        ;
+      ELSE
+        WHILE MySyntaxColouring#NIL DO
+          IF Syntax.PosInFileName(win.Extension, MySyntaxColouring.Extension, 1)>0 THEN
+            Options.ActSyntaxColouring   := MySyntaxColouring;
+          END (* IF Strings.Pos(Extension, name, 1)>0  *);
+          MySyntaxColouring  := MySyntaxColouring.Next;
+        END (* WHILE MySyntaxColouring#NIL  *);
+      END (* IF Strings.Length(win.Extension)=0  *);
       CreateCaret(win);
-      reslt:=WinUser.SendMessageA(WinUser.GetParent(win.hwnd),ListSt.PEM_SHOWLINER,SYSTEM.VAL(WinDef.WPARAM,win.col),
-                          SYSTEM.VAL(WinDef.LPARAM,win.row));
+      Result   := WinUser.SendMessageA(WinUser.GetParent(win.hwnd),
+                                       ListSt.PEM_SHOWLINER,
+                                       SYSTEM.VAL(WinDef.WPARAM, win.col),
+                                       SYSTEM.VAL(WinDef.LPARAM, win.row));
       IF Options.insert THEN 
-        reslt:=WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWINSERTMODE,1,0); 
+        Result := WinUser.SendMessageA(WinUser.GetParent(hWnd), ListSt.PEM_SHOWINSERTMODE, 1, 0); 
       ELSE 
-        reslt:=WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWINSERTMODE,0,0);
-      END;      
+        Result := WinUser.SendMessageA(WinUser.GetParent(hWnd), ListSt.PEM_SHOWINSERTMODE, 0, 0);
+      END;
     
     (****** WM_TIMER *******)
     ELSIF message=WinUser.WM_TIMER THEN
@@ -808,7 +855,7 @@ BEGIN
     (****** WM_LBUTTONDBLCLK oder WM_MBUTONDOWN *******)
     ELSIF (message=WinUser.WM_LBUTTONDBLCLK) OR (message=WinUser.WM_MBUTTONDOWN) THEN
       IF win.readOnly THEN 
-        reslt:=WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_DOUBLECLICK,0,0); 
+        Result := WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_DOUBLECLICK,0,0); 
       ELSE
         MsgLeftDoubleClick(win,SYSTEM.LOWORD(lParam),SYSTEM.HIWORD(lParam));
       END;
@@ -821,7 +868,7 @@ BEGIN
       END;
       IF win.readOnly THEN RETURN 0 END;
       win.changed:=TRUE;
-      reslt:=WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWCHANGED,1,0);
+      Result   := WinUser.SendMessageA(WinUser.GetParent(hWnd),ListSt.PEM_SHOWCHANGED,1,0);
       IF win.text.isSelected & 
          ~((wParam=WinUser.VK_ESCAPE) OR (wParam=WinUser.VK_BACK) OR CtrlPressed()) THEN   
         win.SetUndoAction(TextWin.ACT_OVERWRITESELECTION);
@@ -862,6 +909,7 @@ BEGIN
       RETURN WinUser.DefWindowProcA(hWnd, message, wParam, lParam)
     END;
   END;
+
   RETURN 0;
 
 END BoostedWndProc;
@@ -869,14 +917,15 @@ END BoostedWndProc;
 
 (***********************************************************************************************)   
 
-PROCEDURE RegisterClass*():BOOLEAN;
+PROCEDURE RegisterClass*              ()
+                                      :BOOLEAN;
 VAR
-  wc : WinUser.WNDCLASSEX;
+  wc:                                  WinUser.WNDCLASSEX;
 BEGIN
   wc.cbSize        := SIZE(WinUser.WNDCLASSEX);
-  wc.style:=0; 
-  wc.style:=SYSTEM.BITOR(wc.style,WinUser.CS_OWNDC);
-  wc.style:=SYSTEM.BITOR(wc.style,WinUser.CS_DBLCLKS); 
+  wc.style         := 0; 
+  wc.style         := SYSTEM.BITOR(wc.style, WinUser.CS_OWNDC);
+  wc.style         := SYSTEM.BITOR(wc.style, WinUser.CS_DBLCLKS); 
   wc.lpfnWndProc   := BoostedWndProc; 
   wc.cbClsExtra    := 0;
   wc.cbWndExtra    := 4;  
@@ -892,30 +941,27 @@ END RegisterClass;
 
 
 (***********************************************************************************************)   
-
-PROCEDURE UnregisterClass*();
+PROCEDURE UnregisterClass*            ();
 VAR
-  res: WinDef.BOOL;
+  ResultBool:                          WinDef.BOOL;
 BEGIN
-  res:=WinUser.UnregisterClassA(SYSTEM.ADR(CLASSNAME),GlobWin.hInstance);
+  ResultBool   := WinUser.UnregisterClassA(SYSTEM.ADR(CLASSNAME), GlobWin.hInstance);
 END UnregisterClass;
 
 
 (***********************************************************************************************)   
-
-PROCEDURE CloseAllWindows*();
+PROCEDURE CloseAllWindows*            ();
 VAR
-  res: WinDef.BOOL;
+  ResultBool:                          WinDef.BOOL;
 BEGIN
   WHILE wCounter>0 DO
-    res:=WinUser.DestroyWindow(wList[0].hwnd);
+    ResultBool := WinUser.DestroyWindow(wList[0].hwnd);
   END;
 END CloseAllWindows;
  
 
 (***********************************************************************************************)   
 (***********************************************************************************************)   
-
 BEGIN
-  langHelpFile:='';
+  langHelpFile := '';
 END WinHnd.
