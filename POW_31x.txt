@@ -48,3 +48,5 @@ ChangeLog
 		- SymBrowser32 included as of 2005/05/26, old Symbrowser removed
 050627	- SymBrowser32 updated to 2005/06/24, project file renamed to
           SymbolFileBrowser
+060921  - no linker.log, unknown sections are omitted in link32
+        - log deactivated in RTS

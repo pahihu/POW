@@ -30,7 +30,7 @@ MODULE RTSOberon;
   CONST
     
     (* -- start settings -- *)
-    LOG_ACTIVE = TRUE;
+    LOG_ACTIVE = FALSE;
 
     (* -- garbage collector -- *)
     GC_ACTIVE  = TRUE;

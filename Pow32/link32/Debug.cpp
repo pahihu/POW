@@ -1670,7 +1670,8 @@ CMyMemFile *CExeFileDebugSection::BuildCVsstAlignSym(CObjFile *aObjFil)
 						
 								default: memset(msgBuf, 0x00, 256);
 										wsprintf((char *)msgBuf, "\n0X%04x", symRecHdr.symTyp);
-										WriteMessageToPow(MSG_NUL, (char *)msgBuf, NULL);
+										// 060921AP
+										if (false) WriteMessageToPow(MSG_NUL, (char *)msgBuf, NULL);
 							}
 						}
 						else			// verSgn == VER_SGN_CV5
@@ -1721,7 +1722,8 @@ CMyMemFile *CExeFileDebugSection::BuildCVsstAlignSym(CObjFile *aObjFil)
 
 								default: 	memset(msgBuf, 0x00, 256);
 										wsprintf((char *)msgBuf, "\n0X%04x", symRecHdr.symTyp);
-										WriteMessageToPow(MSG_NUL, (char *)msgBuf, NULL);
+										// 060921AP
+										if (false) WriteMessageToPow(MSG_NUL, (char *)msgBuf, NULL);
 							}
 						}
 					

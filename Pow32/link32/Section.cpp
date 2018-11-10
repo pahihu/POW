@@ -2174,9 +2174,9 @@ DWORD CExeFileExportSection::BuildExpFncSec(char *dllOrExeFilNam, WORD fAln)
  secRawDat-> Write(expNamTabBuf, expNamTab-> GetLength());
  expFilEdataRawDat-> Write(expNamTabBuf, expNamTab-> GetLength());
  
-	actSecTab-> virSiz= secRawDat-> GetPosition();
+ actSecTab-> virSiz= secRawDat-> GetPosition();
  secRawDat-> Write(chrBuf00, BytesTillAlignEnd(actSecTab-> virSiz, fAln));
- WriteExpSecToFile();
+ // WriteExpSecToFile();
 
 	if (expNamTab)
 	{
