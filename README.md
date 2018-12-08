@@ -3,7 +3,7 @@ For more information check [Programmers Open Workbench](http://www.fim.uni-linz.
 The code can be compiled using Visual C++ 6.0, because the Oberon linker understands the
 Visual C++ 5.0 format only.
 
-There are excellent Oberon compilers like [GPCP](https://github.com/k-john-gough/gpcp), [Astrobe](http://www.astrobe.com), [OBC](http://spivey.oriel.ox.ac.uk/corner/Oxford_Oberon-2_compiler) or
+There are excellent Oberon/Component Pascal compilers like [GPCP](https://github.com/k-john-gough/gpcp), [Astrobe](http://www.astrobe.com), [OBC](http://spivey.oriel.ox.ac.uk/corner/Oxford_Oberon-2_compiler) or
 [XDS](https://www.excelsior-usa.com/xds.html)
 
 **NOTE**: Good luck!
