@@ -4,6 +4,6 @@ The code can be compiled using Visual C++ 6.0, because the Oberon linker underst
 Visual C++ 5.0 format only.
 
 There are excellent Oberon/Component Pascal compilers like [GPCP](https://github.com/k-john-gough/gpcp), [Astrobe](http://www.astrobe.com), [OBC](http://spivey.oriel.ox.ac.uk/corner/Oxford_Oberon-2_compiler) or
-[XDS](https://www.excelsior-usa.com/xds.html)
+[XDS](https://github.com/excelsior-oss/xds)
 
 **NOTE**: Good luck!
