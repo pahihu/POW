@@ -306,6 +306,7 @@ BOOL CObj2Exe::InitLinker()
  /*** Zuweisen des Startupsymbols ***/
 	/***********************************/
 
+	symBuf = NULL;
  if (pubSymLst-> Lookup(startUpSym, (void *&)symBuf))
   newExeFil-> textSec-> startUpSym= symBuf;
  else
@@ -313,14 +314,21 @@ BOOL CObj2Exe::InitLinker()
 		CString sUpSym("_");
 		sUpSym+= startUpSym;
 		
+		symBuf = NULL;
 		if (pubSymLst-> Lookup(sUpSym, (void *&)symBuf))
 			newExeFil-> textSec-> startUpSym= symBuf;
 		else
-		{
-			WriteMessageToPow(ERR_MSGI_NO_STA_SYM, startUpSym, NULL);
-			lnkOK= FALSE;
-		}
+	 {
+		 WriteMessageToPow(ERR_MSGI_NO_STA_SYM, startUpSym, NULL);
+		 lnkOK= FALSE;
+	 }
 	}
+	if (symBuf != NULL && symBuf->dllExpEnt == NULL)
+	{
+		 WriteMessageToPow(ERR_MSGI_NO_STA_SYM, startUpSym, NULL);
+		 lnkOK= FALSE;
+	}
+
 
 	/***************************************************************************/
 	/*** Überprüfen ob die zu exportierenden Symbole aufgelöst werden können ***/
