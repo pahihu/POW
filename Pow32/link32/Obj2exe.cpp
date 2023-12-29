@@ -280,9 +280,9 @@ BOOL CObj2Exe::InitLinker()
 
  if (!pubSymLst-> Lookup(startUpSym, (void *&)symBuf))
  {
-			if (oneLibLst)
+		 if (oneLibLst)
 				startUpObjFil= FndSymInLibsOneList(startUpSym, aLibFil);
-			else
+		 else
 				startUpObjFil= FndSymInLibs(startUpSym, aLibFil);
 			
 			if (startUpObjFil)
@@ -323,11 +323,6 @@ BOOL CObj2Exe::InitLinker()
 		 lnkOK= FALSE;
 	 }
 	}
-	if (symBuf != NULL && symBuf->dllExpEnt == NULL)
-	{
-		 WriteMessageToPow(ERR_MSGI_NO_STA_SYM, startUpSym, NULL);
-		 lnkOK= FALSE;
-	}
 
 
 	/***************************************************************************/
@@ -353,7 +348,8 @@ BOOL CObj2Exe::InitLinker()
 					CString nSymNam("_");
      nSymNam+= expFncLst[expFncNamInd];
 
-					if (!pubSymLst-> StringIsKeyPart(nSymNam.GetBuffer(20), (void *&)expFncSymEnt))
+					BOOL ret = pubSymLst-> StringIsKeyPart(nSymNam.GetBuffer(20), (void *&)expFncSymEnt);
+					if (!ret || (expFncSymEnt->symObjFil && expFncSymEnt->symObjFil->libObjFil))
 					{
 						WriteMessageToPow(ERR_MSGI_NO_EXP_SYM, expFncLst[expFncNamInd], NULL);
 						lnkOK= FALSE;
