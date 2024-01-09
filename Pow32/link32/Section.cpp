@@ -1913,7 +1913,8 @@ DWORD CExeFileImportSection::BuildDllImpSec(CMyMapStringToPtr *pubSymLst, WORD f
  delete namTab;    
 
  actSecTab-> virSiz= secRawDat-> GetPosition();
-	secRawDat-> Write(chrBuf00, secRawDatSiz - actSecTab-> virSiz);	
+	if (secRawDatSiz > actSecTab-> virSiz)
+	  secRawDat-> Write(chrBuf00, secRawDatSiz - actSecTab-> virSiz);	
  
  return secRawDatSiz;
 }
