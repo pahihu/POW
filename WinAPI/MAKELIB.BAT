@@ -21,7 +21,7 @@ echo.
 pause
 
 del win32.lib
-lib /out:win32.lib /LINK50COMPAT winnt.obj wingdi.obj winbase.obj windef.obj winuser.obj commdlg.obj wincon.obj dde.obj ddeml.obj
+lib /out:win32.lib /LINK50COMPAT winnt.obj wingdi.obj winbase.obj windef.obj winuser.obj commdlg.obj commctrl.obj wincon.obj dde.obj ddeml.obj shellapi.obj
 
 echo.
 echo The proper directories for the files generated with this batch file are:

@@ -34,6 +34,10 @@ pahi@info-m.hu
 
 ChangeLog
 =========
+240110  - added comctl32.lib, shell32.lib
+        - WinApi uses commctrl.mod V1.4 from Klaus Schultze (2003)
+        - added O2Debug tool from Klaus Schultze
+        - added RayTest example
 240109  - stack size of pow.exe reduced to 64MB, now it runs in Win10/11
         - fixed some linker bugs
         - changed PostInstall.bat to handle Windows 32/64bit

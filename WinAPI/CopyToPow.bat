@@ -1,6 +1,6 @@
 @echo off
 
-set dst_dir="C:\Program Files\Pow!\Oberon-2\WinApi"
+set dst_dir="C:\Pow"
 
 echo.
 echo This batch file copies the WINAPI files to the proper Pow! directories.
@@ -18,7 +18,7 @@ echo.
 echo The proper directories for the files generated with this batch file are:
 echo ------------------------------------------------------------------------
 echo.
-copy *.sym     %dst_dir%
-copy Win32.lib %dst_dir%
-copy Win32.hlp %dst_dir%
+copy *.sym     %dst_dir%\Oberon-2\WinApi
+copy Win32.lib %dst_dir%\Oberon-2\WinApi
+rem copy Win32.hlp %dst_dir%
 if errorlevel 1 pause

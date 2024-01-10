@@ -1,0 +1,150 @@
+#include <D:\win32pwb\Bin\winuser.h>
+
+///////////////////////////////////////////////////////////////////////////////
+//     Icons
+//
+
+1              ICON                   "Data/Ra.ico"
+11             ICON                   "Data/Mainicon.ico"
+
+///////////////////////////////////////////////////////////////////////////////
+//     Cursors
+//
+
+1              CURSOR                 "Data/harrow.cur"
+
+///////////////////////////////////////////////////////////////////////////////
+//     Bitmaps
+//
+
+00001          BITMAP MOVEABLE PURE   "Data/BMP00002.BMP"
+00002          BITMAP MOVEABLE PURE   "Data/FrmtBar.BMP"
+00003          BITMAP MOVEABLE PURE   "Data/NewScn1.BMP"
+
+///////////////////////////////////////////////////////////////////////////////
+//     Menus
+//
+
+MainMenu       MENU
+{
+  POPUP "&Files"
+  {
+    MENUITEM "O&pen",                  102
+    MENUITEM "Close",                  103
+    MENUITEM SEPARATOR
+    MENUITEM "Start",                  111
+    MENUITEM "Attach",                 112
+    MENUITEM "Suspend",                113
+    MENUITEM "Resume",                 114
+    MENUITEM "Stop",                   115
+    MENUITEM SEPARATOR
+    MENUITEM "Print",                  121
+    MENUITEM "Printer Setup",          122 
+    MENUITEM SEPARATOR
+    MENUITEM "Exit",                   199
+  }
+  POPUP "&Edit"
+  {
+    MENUITEM "&Search",                201
+    MENUITEM "R&eplace",               202
+    MENUITEM "&Goto",                  203
+    MENUITEM "&Cut",                   204
+    MENUITEM "&Paste",                 205
+  }
+  POPUP "&View"
+  {
+    MENUITEM "HexData",                301
+    MENUITEM SEPARATOR
+    MENUITEM "Dump Data",              302
+    MENUITEM "Section Headers",        303
+    POPUP "Data Directories"
+    {
+      MENUITEM "Export",               311
+      MENUITEM "Import",               312
+      MENUITEM "Resource",             313
+      MENUITEM "Exception",            314
+      MENUITEM "Security",             315
+      MENUITEM "BaseRelocation",       316
+      MENUITEM "Debug",                317
+      MENUITEM "Copyright",            318
+      MENUITEM "Global Pointer",       319
+      MENUITEM "Thread Local Storage", 320
+      MENUITEM "Load Config",          321
+      MENUITEM "Bound Import",         322
+      MENUITEM "Import Address Table", 323
+    }
+    MENUITEM SEPARATOR
+    MENUITEM "Symbol Table"            305
+    MENUITEM "Line Numbers",           306
+    MENUITEM "Symbol Table (global)",  307
+  }
+  POPUP "&Window"
+  {
+    MENUITEM "Tile horizontal",        401
+    MENUITEM "Tile vertical",          402
+    MENUITEM "Cascade",                403
+    MENUITEM "Arrange icons",          404
+    MENUITEM "Close all",              405
+  }
+  POPUP "&Administration"
+  {
+    MENUITEM "Font",                   701
+    MENUITEM SEPARATOR
+    POPUP "&StatusBar"
+    {
+      MENUITEM "Zero",                 710
+      MENUITEM "First",                711
+      MENUITEM "Second",               712
+      MENUITEM "Third",                713
+      MENUITEM "Fourth",               714
+    }
+  }
+  POPUP "&Options"
+  {
+    MENUITEM "Write",                  801
+    MENUITEM "Read" ,                  802
+  }
+  POPUP "&Help"
+  {
+    MENUITEM "&Help",                  900
+    MENUITEM "&About",                 902
+  }
+}
+
+AboutBox       DIALOGEX                10, 10, 150, 75
+               STYLE WS_CAPTION | WS_EX_DLGMODALFRAME
+               CAPTION "About"
+{
+  CTEXT        "Oberon-2 Debugger; V 1.40", 
+                                       601, 15, 10, 120, 20
+  CTEXT        "Copyright Klaus Schultze", 
+                                       602, 15, 25, 120, 15
+  PUSHBUTTON   "OK",                   609, 60, 50,  30, 15
+}
+
+STRINGTABLE
+  {
+   102                                "Open a file for dumping"
+   103                                "Close file"
+   111                                "Open a file for debugging (and dumping)"
+   112                                "Attach file for debugging"
+   113                                "Suspend debugging"
+   114                                "Restart debugging"
+   115                                "Stop debugging, close file"
+   121                                "Print"
+   122                                "Configure printer"
+   199                                "Close program"
+
+  1014                                "DBGEVNTCLOSEACK"
+  1015                                "DBGEVNTACTIVE"
+  1016                                "DBGEVNTCLOSE"
+  1017                                "DBGEVNTSUSPEND"
+  1018                                "DBGEVNTRESUME"
+  1019                                "DBGEVNTSETTHREAD"
+  1020                                "DBGEVNTINITACK"
+  1021                                "DBGEVNTSTOP"
+  1022                                "DBGEVNTSTART"
+  1023                                "DBGEVNTSETPROCESS"
+  
+  }
+

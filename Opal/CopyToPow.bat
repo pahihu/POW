@@ -1,6 +1,6 @@
 @echo off
 
-set dst_dir="C:\Programs\Pow"
+set dst_dir="C:\Pow"
 
 echo.
 echo This batch file copies the OPAL library to the proper Pow! directories.
@@ -20,3 +20,4 @@ copy opal32a_dll.lib   %dst_dir%\Oberon-2\Opal\opal32dll.lib
 copy opal32dllhelp.lib %dst_dir%\Oberon-2\Opal\opal32dllhelp.lib
 copy opal32lib.lib     %dst_dir%\Oberon-2\Opal\opal32lib.lib
 copy opal32a_dll.dll   %dst_dir%\Oberon-2\Redistribution
+rem copy opal32a_dll.dll   %SystemRoot%\System32
