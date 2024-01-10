@@ -38,6 +38,12 @@ ChangeLog
         - WinApi uses commctrl.mod V1.4 from Klaus Schultze (2003)
         - added O2Debug tool from Klaus Schultze
         - added RayTest example
+        - added sources for CppH2O, O32,
+          _ob32 htmlhelp sources, winapi htmlhelp sources
+        - Petzold Ch01-04 examples
+        - CommandLineTool executable
+        - Oberon-2 report in PDF format
+        - OB32 and WinApi helps in CHM format
 240109  - stack size of pow.exe reduced to 64MB, now it runs in Win10/11
         - fixed some linker bugs
         - changed PostInstall.bat to handle Windows 32/64bit

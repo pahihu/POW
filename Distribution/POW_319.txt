@@ -1,0 +1,68 @@
+POW zip package
+===========================
+
+This package contains the following items:
+
+- pow32_30b version
+- patches from the POW32 group's Files/Patches folder
+
+The included patches are:
+
+- BoostEd.Source.zip
+- Boosted32.zip
+- Opal.zip
+- RTS.zip
+- obrn32.zip
+- pow.zip
+- SymBrowser32.zip
+
+    To see the the actual contents of the package, please visit the
+ChangeLog section at the end of this file.
+
+    I have recompiled the C sources with Visual C++ 6.0 and then
+recompiled the whole package with itself. I have made some modifications
+in the batch files for some packages to produce lib files in VC5 format,
+since the linker included with POW understands this format only.
+
+    To install the redistributable DLLs please run the PostInstall.bat
+file, after you extract the package contents in a directory.
+
+
+Regards,
+Andras Pahi
+pahi@info-m.hu
+
+ChangeLog
+=========
+240110  - added comctl32.lib, shell32.lib
+        - WinApi uses commctrl.mod V1.4 from Klaus Schultze (2003)
+        - added O2Debug tool from Klaus Schultze
+        - added RayTest example
+        - added sources for CppH2O, O32,
+          _ob32 htmlhelp sources, winapi htmlhelp sources
+        - Petzold Ch01-04 examples
+        - CommandLineTool executable
+        - Oberon-2 report in PDF format
+        - OB32 and WinApi helps in CHM format
+240109  - stack size of pow.exe reduced to 64MB, now it runs in Win10/11
+        - fixed some linker bugs
+        - changed PostInstall.bat to handle Windows 32/64bit
+080427	- stack size of pow.exe reduced (Vista GetOpen/SaveFileName bug)
+        - PostInstall.bat modified to handle Vista
+060921  - no linker.log, unknown sections are omitted in link32
+        - log deactivated in RTS
+050627	- SymBrowser32 updated to 2005/06/24, project file renamed to
+          SymbolFileBrowser
+050624	- BoosteEd as of 2005/06/15
+        - SymBrowser32 included as of 2005/05/26, old Symbrowser removed
+050316  - BoostEd mouse wheel fixes
+        - removed the Windows 2000 files, now boosted32 and obrn32
+          are linked without a base address
+        - BoostEd.ini file added to the config files
+040903  - obrn32_w2k.dll and boosted32_w2k.ell are for Windows 2000
+040824  - fixes for Pow from Klaus Schultze
+040426  - missing credits.txt added
+        - comdlg32, kernel32, user32, gdi32 lib files converted
+        - initial configuration settings are added to .\Oberon-2\Config
+        - PostInstall.bat fixed to copy the configuration files
+040416  Initial release with a PostInstall batch file
